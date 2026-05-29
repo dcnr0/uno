@@ -3,426 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elias's UNO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>uno</title>
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --u-blue: #00b4d8;
-            --n-green: #2ecc71;
-            --o-red: #e74c3c;
-            --y-yellow: #f1c40f;
-            --wild-black: #2d3748;
+        * {
+            box-sizing: border-box;
         }
-
-        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
         body {
-            font-family: 'Fredoka One', cursive;
-            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #d4d4d4;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: #000000;
+            padding: 30px;
+            border: 1px solid #222222;
+        }
+        h1 {
+            color: #e51c23;
+            font-size: 1.8em;
+            letter-spacing: -1px;
+            margin-top: 0;
+            text-transform: lowercase;
+        }
+        p {
+            font-size: 0.9em;
+            color: #888888;
+            margin: 15px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        label {
+            display: block;
+            font-size: 0.8em;
+            color: #666666;
+            margin-bottom: 5px;
+            text-transform: lowercase;
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            background: #111111;
+            border: 1px solid #262626;
             color: #ffffff;
-            min-height: 100vh;
-            overflow-x: hidden;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            outline: none;
+        }
+        input[type="text"]:focus, input[type="email"]:focus {
+            border-color: #444444;
+        }
+        .file-upload-wrapper {
+            position: relative;
+            background: #111111;
+            border: 1px dashed #262626;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .file-upload-wrapper:hover {
+            border-color: #444444;
+        }
+        input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-label-text {
+            font-size: 0.8em;
+            color: #666666;
+            text-transform: lowercase;
+        }
+        button {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #e51c23;
+            padding: 10px 24px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            text-transform: lowercase;
+            margin-top: 10px;
+            transition: background 0.15s ease;
+        }
+        button:hover {
+            background: #e51c23;
+            color: #000000;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Arena Layout Styles */
+        .status-box {
+            font-size: 0.85em;
+            color: #888888;
+            border: 1px solid #1a1a1a;
+            padding: 12px;
+            margin-bottom: 25px;
+            background: #050505;
+        }
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .player-node {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            padding: 10px;
             position: relative;
         }
-
-        #audioLibrary { display: none; }
-
-        .window-view { position: fixed; inset: 0; z-index: 100; overflow-y: auto; padding: 40px 20px; display: none; align-items: center; justify-content: center; }
-        .window-view.active-view { display: flex; }
-
-        .auth-card {
-            background: #ffffff; color: #0f172a; padding: 40px; border-radius: 28px; width: 100%; max-width: 440px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 6px solid var(--u-blue); text-align: center;
+        .player-node.active-turn {
+            border-color: #e51c23;
         }
-        .auth-card h2 { font-size: 28px; margin-bottom: 25px; color: #1e293b; }
-        .auth-card input {
-            width: 100%; padding: 14px 20px; font-size: 16px; border-radius: 12px; border: 3px solid #cbd5e1;
-            margin-bottom: 20px; font-family: 'Fredoka One', cursive; outline: none; text-align: center;
+        .player-name {
+            font-size: 0.8em;
+            font-weight: bold;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .auth-card input:focus { border-color: var(--u-blue); }
-
-        .pfp-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .pfp-avatar {
-            width: 60px; height: 60px; border-radius: 50%; border: 4px solid #cbd5e1; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;
-            transition: all 0.15s ease;
+        .owner-tag {
+            color: #ffb300;
+            font-size: 0.7em;
+            display: block;
+            margin-top: 2px;
         }
-        .pfp-1 { background: #3498db; } .pfp-2 { background: #e74c3c; }
-        .pfp-3 { background: #2ecc71; } .pfp-4 { background: #f1c40f; }
-        .pfp-avatar.selected-pfp { border-color: #0f172a; transform: scale(1.15); }
-
-        .btn-submit {
-            width: 100%; background: var(--n-green); color: white; border: none; padding: 14px;
-            font-family: 'Fredoka One', cursive; font-size: 18px; border-radius: 14px; cursor: pointer;
-            box-shadow: 0 5px 0 #16a34a; margin-bottom: 15px;
+        .avatar-frame {
+            width: 50px;
+            height: 50px;
+            margin: 8px auto;
+            border: 1px solid #262626;
+            background: #111111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-submit:active { transform: translateY(4px); box-shadow: none; }
-        .toggle-link { color: var(--u-blue); cursor: pointer; text-decoration: underline; font-size: 14px; }
-
-        .game-wrapper { display: none; width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .game-wrapper.active-board { display: block; }
-
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 15px 30px; border-radius: 20px; }
-        .user-profile-badge { display: flex; align-items: center; gap: 12px; }
-
-        .grid-board { display: grid; grid-template-columns: 280px 1fr; gap: 30px; margin-bottom: 30px; }
-        .opponents-panel { background: rgba(15,23,42,0.6); padding: 25px; border-radius: 24px; border: 3px solid #334155; display: flex; flex-direction: column; gap: 20px; }
-        
-        .player-row { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #1e293b; border-radius: 18px; border-left: 6px solid #64748b; }
-        .player-row.active-playing { border-left-color: var(--n-green); background: #24344d; animation: pulseBorder 1.5s infinite ease-in-out; }
-
-        .center-felt {
-            position: relative; background: rgba(255,255,255,0.02); border-radius: 32px; border: 4px dashed rgba(255,255,255,0.08);
-            display: flex; justify-content: center; align-items: center; gap: 50px; padding: 60px; min-height: 340px;
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-
-        .uno-card {
-            width: 120px; height: 180px; border-radius: 14px; background: white; border: 5px solid white;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.4); position: relative; cursor: pointer;
-            overflow: hidden; display: inline-block; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 1; transform: translateY(0);
+        .avatar-fallback {
+            font-size: 0.9em;
+            color: #555555;
         }
-        .uno-card.dealing { animation: dealIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards; opacity: 0; transform: scale(0.4) translateY(-150px); }
-        @keyframes dealIn { to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        .uno-card:hover { transform: translateY(-20px) scale(1.08); box-shadow: 0 15px 30px rgba(0,0,0,0.6); z-index: 900; }
-        .card-inner { position: absolute; inset: 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .card-inner::before { content: ''; position: absolute; width: 130%; height: 75%; background: rgba(255,255,255,0.18); transform: rotate(-25deg); border-radius: 50%; }
-        .card-center-val { font-size: 34px; color: white; font-weight: bold; z-index: 5; text-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
-
-        .blue { background-color: var(--u-blue); } .blue .card-inner { background-color: var(--u-blue); }
-        .green { background-color: var(--n-green); } .green .card-inner { background-color: var(--n-green); }
-        .red { background-color: var(--o-red); } .red .card-inner { background-color: var(--o-red); }
-        .yellow { background-color: var(--y-yellow); } .yellow .card-inner { background-color: var(--y-yellow); }
-        .wild { background-color: var(--wild-black); } .wild .card-inner { background-color: var(--wild-black); }
-        .wild .card-inner::before { content: ''; position: absolute; inset: 0; transform: none; border-radius: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--o-red) 50%, var(--u-blue) 50%); }
-
-        .player-tray { background: rgba(15,23,42,0.8); padding: 30px; border-radius: 28px; border: 3px solid #334155; margin-top: 25px; }
-        .hand-scroller { display: flex; gap: 15px; overflow-x: auto; padding: 15px 5px; min-height: 220px; align-items: flex-end; }
-
-        .draw-btn {
-            width: 120px; height: 180px; border-radius: 14px; background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 4px dashed #475569; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; gap: 10px; color: #94a3b8;
+        .card-count {
+            font-size: 0.75em;
+            color: #666666;
+            display: block;
         }
-
-        #colorPicker { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .color-opt { width: 110px; height: 110px; border-radius: 20px; border: 4px solid white; cursor: pointer; }
+        .table-center {
+            background: #050505;
+            border: 1px solid #161616;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .discard-card {
+            display: inline-block;
+            width: 70px;
+            height: 105px;
+            border: 1px solid #333333;
+            background: #000000;
+            line-height: 105px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+        }
+        .hand-container {
+            text-align: center;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 1px solid #1c1c1c;
+            min-height: 140px;
+            margin-bottom: 15px;
+        }
+        .hand-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+        .game-card {
+            width: 65px;
+            height: 95px;
+            background: #000000;
+            border: 1px solid #333333;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-card:hover {
+            border-color: #ffffff !important;
+            transform: translateY(-4px);
+        }
+        .action-bar {
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="audioLibrary">
-        <audio id="audioShuffle" src="/sfx/freesound_community-riffle-card-shuffle-104313.mp3" preload="auto"></audio>
-        <audio id="audioPlayCard" src="/sfx/freesound_community-flipcard-91468.mp3" preload="auto"></audio>
-    </div>
-
-    <div id="colorPicker">
-        <div class="color-grid">
-            <div class="color-opt red" onclick="submitWildChoice('red')"></div>
-            <div class="color-opt blue" onclick="submitWildChoice('blue')"></div>
-            <div class="color-opt green" onclick="submitWildChoice('green')"></div>
-            <div class="color-opt yellow" onclick="submitWildChoice('yellow')"></div>
+    <div id="lobby-screen" class="container">
+        <h1>uno lobby</h1>
+        <p>enter configurations to join the arena match:</p>
+        
+        <div class="form-group" style="margin-top: 25px;">
+            <label for="usernameInput">display name</label>
+            <input type="text" id="usernameInput" placeholder="guest username" autocomplete="off">
         </div>
-    </div>
-
-    <div class="window-view active-view" id="viewSignup">
-        <div class="auth-card">
-            <h2>CREATE ACCOUNT</h2>
-            <p style="margin-bottom:15px; font-size:14px;">Select an Avatar:</p>
-            <div class="pfp-selector">
-                <div class="pfp-avatar pfp-1 selected-pfp" onclick="pickAvatar(1, this)"><i class="fas fa-ghost"></i></div>
-                <div class="pfp-avatar pfp-2" onclick="pickAvatar(2, this)"><i class="fas fa-dragon"></i></div>
-                <div class="pfp-avatar pfp-3" onclick="pickAvatar(3, this)"><i class="fas fa-robot"></i></div>
-                <div class="pfp-avatar pfp-4" onclick="pickAvatar(4, this)"><i class="fas fa-ninja"></i></div>
-            </div>
-            <input type="text" id="regUser" placeholder="USERNAME">
-            <input type="email" id="regEmail" placeholder="EMAIL ADDRESS">
-            <input type="password" id="regPass" placeholder="PASSWORD">
-            <button class="btn-submit" onclick="submitRegistration()">SIGN UP</button>
-            <p>Have an account? <span class="toggle-link" onclick="routeView('viewLogin')">Login here</span></p>
+        
+        <div class="form-group">
+            <label for="emailInput">email configuration (optional)</label>
+            <input type="email" id="emailInput" placeholder="owner or player verification" autocomplete="off">
         </div>
-    </div>
-
-    <div class="window-view" id="viewVerify">
-        <div class="auth-card" style="border-color: var(--y-yellow);">
-            <h2>VERIFICATION REQUIRED</h2>
-            <p style="color:#64748b; margin-bottom:20px; font-size:14px;">Enter the 6-digit verification code sent to your email.</p>
-            <input type="text" id="verifyCode" maxlength="6" placeholder="000000" style="font-size:26px; letter-spacing:4px;">
-            <button class="btn-submit" style="background:var(--y-yellow); box-shadow:0 5px 0 #d97706;" onclick="submitVerificationCode()">VERIFY</button>
-        </div>
-    </div>
-
-    <div class="window-view" id="viewLogin">
-        <div class="auth-card" style="border-color: var(--n-green);">
-            <h2>WELCOME</h2>
-            <input type="text" id="loginUser" placeholder="USERNAME">
-            <input type="password" id="loginPass" placeholder="PASSWORD">
-            <button class="btn-submit" style="background:var(--u-blue); box-shadow:0 5px 0 #0284c7;" onclick="submitLogin()">LOG IN</button>
-            <p>New profile? <span class="toggle-link" onclick="routeView('viewSignup')">Sign up</span></p>
-        </div>
-    </div>
-
-    <div class="game-wrapper" id="mainGamePlayground">
-        <div class="dashboard-header">
-            <div class="user-profile-badge">
-                <div class="pfp-avatar" id="activeUserPfp"></div>
-                <div>
-                    <h3 id="activeUserName">Player</h3>
-                    <span style="font-size:12px; color:var(--u-blue);">Active Session</span>
-                </div>
-            </div>
-            <div id="matchLogStatus" style="font-size:16px; font-weight:bold;">Awaiting Deal...</div>
-            <button class="btn-submit" style="width:auto; padding:10px 20px; margin:0; background:var(--o-red); box-shadow:0 4px 0 #b91c1c;" onclick="location.reload()">LOGOUT</button>
-        </div>
-
-        <div class="grid-board">
-            <div class="opponents-panel" id="lobbyRosterBox"></div>
-
-            <div class="center-felt">
-                <div>
-                    <p style="text-align:center; font-size:12px; color:#94a3b8; margin-bottom:8px;">DECK PACK</p>
-                    <div class="draw-btn" onclick="triggerDrawCardRequest()">
-                        <i class="fas fa-layer-group" style="font-size:28px;"></i>
-                        <span>DRAW</span>
-                    </div>
-                </div>
-                <div>
-                    <p style="text-align:center; font-size:12px; color:#94a3b8; margin-bottom:8px;">DISCARD PILE</p>
-                    <div id="discardStackTarget"></div>
-                </div>
+        
+        <div class="form-group">
+            <label>custom profile avatar image</label>
+            <div class="file-upload-wrapper">
+                <span class="file-label-text" id="file-status-text">drag profile here or browse file</span>
+                <input type="file" id="avatarUpload" accept="image/*" onchange="updateFileLabel()">
             </div>
         </div>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="joinGame()">join game</button>
+        </div>
+    </div>
 
-        <div class="player-tray">
-            <h4 style="color:var(--u-blue); margin-bottom:10px;">YOUR HAND:</h4>
-            <div class="hand-scroller" id="humanCardsHand"></div>
+    <div id="game-screen" class="container hidden">
+        <div class="status-box" id="status-message">
+            awaiting match matrix generation...
+        </div>
+        
+        <div class="players-grid" id="players-list"></div>
+        
+        <div class="table-center">
+            <p style="margin-top: 0; font-size: 0.75em; color: #555555; text-transform: lowercase;">active discard stack</p>
+            <div class="discard-card" id="top-discard">-</div>
+        </div>
+        
+        <div class="hand-container">
+            <p style="margin-top: 0; font-size: 0.75em; color: #555555; text-transform: lowercase;">your card deck matrix</p>
+            <div class="hand-cards" id="your-hand"></div>
+        </div>
+        
+        <div class="action-bar">
+            <button onclick="drawCard()">draw card matrix</button>
         </div>
     </div>
 
     <script>
-        let sessionProfile = { username: "", email: "", pfp_index: 1 };
-        let activeMatchState = null;
-        let selectedWildCardIndex = null;
+        let gameState = null;
 
-        const pfpIcons = { 1: "fa-ghost", 2: "fa-dragon", 3: "fa-robot", 4: "fa-ninja" };
-        const pfpBackgrounds = { 1: "#3498db", 2: "#e74c3c", 3: "#2ecc71", 4: "#f1c40f" };
-
-        function playSound(audioId) {
-            const track = document.getElementById(audioId);
-            if(track) {
-                track.currentTime = 0;
-                track.play().catch(e => console.log("Audio lock:", e));
-            }
-        }
-
-        function routeView(viewId) {
-            document.querySelectorAll('.window-view').forEach(v => v.classList.remove('active-view'));
-            const target = document.getElementById(viewId);
-            if(target) target.classList.add('active-view');
-        }
-
-        function pickAvatar(idx, element) {
-            document.querySelectorAll('.pfp-avatar').forEach(a => a.classList.remove('selected-pfp'));
-            element.classList.add('selected-pfp');
-            sessionProfile.pfp_index = idx;
-        }
-
-        async function submitRegistration() {
-            const username = document.getElementById('regUser').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPass').value;
-            if(!username || !email || !password) return alert("Please fill out all registration fields!");
-
-            const res = await fetch(`/api/auth/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password, pfp_index: sessionProfile.pfp_index })
-            });
-            const data = await res.json();
-            if(data.error) return alert(data.error);
-
-            sessionProfile.email = email;
-            routeView('viewVerify');
-        }
-
-        async function submitVerificationCode() {
-            const code = document.getElementById('verifyCode').value.trim();
-            const res = await fetch(`/api/auth/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: sessionProfile.email, code })
-            });
-            const data = await res.json();
-            if(data.error) return alert(data.error);
-
-            sessionProfile.username = data.username;
-            sessionProfile.pfp_index = data.pfp_index;
-            launchMatchSession();
-        }
-
-        async function submitLogin() {
-            const username = document.getElementById('loginUser').value.trim();
-            const password = document.getElementById('loginPass').value;
-
-            const res = await fetch(`/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if(data.error) {
-                if(data.unverified) {
-                    sessionProfile.email = data.email;
-                    return routeView('viewVerify');
-                }
-                return alert(data.error);
-            }
-
-            sessionProfile.username = data.username;
-            sessionProfile.pfp_index = data.pfp_index;
-            launchMatchSession();
-        }
-
-        async function launchMatchSession() {
-            document.querySelectorAll('.window-view').forEach(v => v.classList.remove('active-view'));
-            document.getElementById('mainGamePlayground').classList.add('active-board');
-
-            const userPfpNode = document.getElementById('activeUserPfp');
-            userPfpNode.className = `pfp-avatar`;
-            userPfpNode.style.backgroundColor = pfpBackgrounds[sessionProfile.pfp_index];
-            userPfpNode.innerHTML = `<i class="fas ${pfpIcons[sessionProfile.pfp_index]}"></i>`;
-            document.getElementById('activeUserName').innerText = sessionProfile.username;
-
-            // Trigger Riffle shuffle audio clip
-            playSound('audioShuffle');
-
-            const res = await fetch(`/api/start_game`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: sessionProfile.username, pfp_index: sessionProfile.pfp_index })
-            });
-            const data = await res.json();
-            renderEngineTree(data, true);
-        }
-
-        function createCardWidget(card, index, triggerDealsAnimation = false, animationDelay = 0) {
-            const el = document.createElement('div');
-            el.className = `uno-card ${card.color}`;
-            if(triggerDealsAnimation) {
-                el.classList.add('dealing');
-                el.style.animationDelay = `${animationDelay}ms`;
-            }
-
-            let symbol = card.value;
-            if(card.value === "Skip") symbol = '<i class="fas fa-ban"></i>';
-            if(card.value === "Reverse") symbol = '<i class="fas fa-sync-alt"></i>';
-
-            el.innerHTML = `<div class="card-inner"><span class="card-center-val">${symbol}</span></div>`;
-            if(index !== -1) {
-                el.onclick = () => routeCardPlay(index, card);
-            }
-            return el;
-        }
-
-        function renderEngineTree(state, isInitialDeal = false) {
-            activeMatchState = state;
-            document.getElementById('matchLogStatus').innerText = state.status_message;
-
-            const lobbyBox = document.getElementById('lobbyRosterBox');
-            lobbyBox.innerHTML = "";
-            state.players.forEach((p, idx) => {
-                if(idx === 0) return;
-                const row = document.createElement('div');
-                row.className = `player-row ${state.current_turn === idx ? 'active-playing' : ''}`;
-                row.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="pfp-avatar" style="width:40px; height:40px; font-size:16px; background:${pfpBackgrounds[p.pfp]};">
-                            <i class="fas ${pfpIcons[p.pfp]}"></i>
-                        </div>
-                        <span>${p.name}</span>
-                    </div>
-                    <strong>${p.card_count} Cards</strong>
-                `;
-                lobbyBox.appendChild(row);
-            });
-
-            const centerDiscard = document.getElementById('discardStackTarget');
-            centerDiscard.innerHTML = "";
-            centerDiscard.appendChild(createCardWidget(state.top_discard, -1));
-
-            const handBox = document.getElementById('humanCardsHand');
-            handBox.innerHTML = "";
-            state.players[0].hand.forEach((card, idx) => {
-                const delayTime = isInitialDeal ? idx * 120 : 0;
-                
-                // Audio updates timed with the card distribution interval
-                if(isInitialDeal) {
-                    setTimeout(() => playSound('audioPlayCard'), delayTime);
-                }
-                handBox.appendChild(createCardWidget(card, idx, isInitialDeal, delayTime));
-            });
-
-            if(state.current_turn !== 0 && !state.game_over) {
-                setTimeout(triggerBotExecutionMove, 1800);
-            }
-        }
-
-        function routeCardPlay(idx, card) {
-            if(activeMatchState.current_turn !== 0) return;
-            if(card.color === "wild") {
-                selectedWildCardIndex = idx;
-                document.getElementById('colorPicker').style.display = "flex";
+        // Visual update for file upload prompt field
+        function updateFileLabel() {
+            const fileInput = document.getElementById('avatarUpload');
+            const label = document.getElementById('file-status-text');
+            if (fileInput.files.length > 0) {
+                label.innerText = fileInput.files[0].name.toLowerCase();
+                label.style.color = '#ffffff';
             } else {
-                commitCardPlay(idx, null);
+                label.innerText = 'drag profile here or browse file';
+                label.style.color = '#666666';
             }
         }
 
-        function submitWildChoice(color) {
-            document.getElementById('colorPicker').style.display = "none";
-            commitCardPlay(selectedWildCardIndex, color);
-        }
-
-        async function commitCardPlay(cardIdx, color) {
-            // Trigger Flipcard audio effect
-            playSound('audioPlayCard');
-
-            const res = await fetch(`/api/play_card`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player_idx: 0, card_idx: cardIdx, chosen_color: color })
-            });
-            const data = await res.json();
-            renderEngineTree(data);
-        }
-
-        async function triggerDrawCardRequest() {
-            if(activeMatchState.current_turn !== 0) return;
+        async function joinGame() {
+            const username = document.getElementById('usernameInput').value;
+            const email = document.getElementById('emailInput').value;
+            const fileInput = document.getElementById('avatarUpload');
             
-            // Draw plays flipcard audio logic
-            playSound('audioPlayCard');
+            let avatarSource = null;
 
-            const res = await fetch(`/api/draw_card`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player_idx: 0 })
-            });
-            const data = await res.json();
-            renderEngineTree(data);
+            // Handle asset uploading conversion logic cleanly to string format
+            if (fileInput.files.length > 0) {
+                avatarSource = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(fileInput.files[0]);
+                });
+            }
+
+            try {
+                const response = await fetch('/api/start_game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        avatar_source: avatarSource
+                    })
+                });
+
+                if (response.ok) {
+                    gameState = await response.json();
+                    document.getElementById('lobby-screen').classList.add('hidden');
+                    document.getElementById('game-screen').classList.remove('hidden');
+                    renderGame();
+                } else {
+                    alert('Lobby entry request rejected by service pipeline.');
+                }
+            } catch (err) {
+                console.error("Connection matrix error:", err);
+                alert('Failed to contact backend server routing.');
+            }
         }
 
-        async function triggerBotExecutionMove() {
-            const res = await fetch(`/api/ai_turn`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
+        // Color mapper utility to translate token strings to theme colors
+        function getColorHex(colorName) {
+            switch(colorName.toLowerCase()) {
+                case 'red': return '#e51c23';
+                case 'blue': return '#1e88e5';
+                case 'green': return '#43a047';
+                case 'yellow': return '#fdd835';
+                default: return '#7b1fa2'; // Wild color theme mapping
+            }
+        }
+
+        function renderGame() {
+            if (!gameState) return;
+
+            // Handle terminal log/status box processing string references
+            document.getElementById('status-message').innerText = gameState.status_message.toLowerCase();
             
-            // Play flipcard sound effect on bot choices
-            playSound('audioPlayCard');
-            renderEngineTree(data);
+            // Render Central Discard Target Card Stack
+            const topCard = gameState.top_discard;
+            const discardDiv = document.getElementById('top-discard');
+            if (topCard) {
+                discardDiv.innerText = topCard.value;
+                discardDiv.style.borderColor = getColorHex(topCard.color);
+                discardDiv.style.color = getColorHex(topCard.color);
+            }
+
+            // Render Active Registered Profiles / Bot Entities Matrix
+            const playersGrid = document.getElementById('players-list');
+            playersGrid.innerHTML = '';
+            
+            gameState.players.forEach((p, idx) => {
+                const pNode = document.createElement('div');
+                pNode.className = 'player-node';
+                
+                // Track turn state indicators dynamically
+                if (gameState.current_turn === idx && !gameState.game_over) {
+                    pNode.classList.add('active-turn');
+                }
+                
+                // Process image asset structure mapping logic based on source depth
+                let avatarLayout = '';
+                if (p.avatar && p.avatar.length > 5) {
+                    avatarLayout = `<img class="avatar-img" src="${p.avatar}" alt="pfp">`;
+                } else {
+                    avatarLayout = `<span class="avatar-fallback">${p.avatar || idx}</span>`;
+                }
+                
+                pNode.innerHTML = `
+                    <span class="player-name">${p.name.toLowerCase()}</span>
+                    ${p.is_owner ? '<span class="owner-tag">[owner]</span>' : ''}
+                    <div class="avatar-frame">
+                        ${avatarLayout}
+                    </div>
+                    <span class="card-count">cards: ${p.card_count}</span>
+                `;
+                playersGrid.appendChild(pNode);
+            });
+
+            // Render Player Execution Hand Matrix Layout
+            const handDiv = document.getElementById('your-hand');
+            handDiv.innerHTML = '';
+            
+            const humanPlayer = gameState.players[0];
+            if (humanPlayer && humanPlayer.hand) {
+                humanPlayer.hand.forEach((card, idx) => {
+                    const cardBtn = document.createElement('button');
+                    cardBtn.className = 'game-card';
+                    cardBtn.innerText = card.value;
+                    cardBtn.style.borderColor = getColorHex(card.color);
+                    cardBtn.style.color = getColorHex(card.color);
+                    
+                    // Route index parameters to play validation stack on request click
+                    cardBtn.onclick = () => playCard(idx);
+                    handDiv.appendChild(cardBtn);
+                });
+            }
+
+            // If a bot turn state remains active, automatically route loop trigger after short fallback delay
+            if (gameState.current_turn !== 0 && !gameState.game_over) {
+                setTimeout(triggerAiTurn, 1400);
+            }
+        }
+
+        async function playCard(cardIdx) {
+            // Check turn priority locally before hitting connection streams
+            if (gameState.current_turn !== 0) {
+                alert("Wait for processing priority cycle to complete.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/play_card', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_idx: 0, card_idx: cardIdx })
+                });
+                
+                if (response.ok) {
+                    gameState = await response.json();
+                    renderGame();
+                } else {
+                    const err = await response.json();
+                    alert(err.error || "Card processing assertion failure.");
+                }
+            } catch (err) {
+                console.error("Card pipeline execution error:", err);
+            }
+        }
+
+        async function drawCard() {
+            if (gameState.current_turn !== 0) return;
+
+            try {
+                const response = await fetch('/api/draw_card', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_idx: 0 })
+                });
+                if (response.ok) {
+                    gameState = await response.json();
+                    renderGame();
+                }
+            } catch (err) {
+                console.error("Stack pulling failure:", err);
+            }
+        }
+
+        async function triggerAiTurn() {
+            if (gameState.game_over) return;
+            
+            try {
+                const response = await fetch('/api/ai_turn', { method: 'POST' });
+                if (response.ok) {
+                    gameState = await response.json();
+                    renderGame();
+                }
+            } catch (err) {
+                console.error("Bot thread automation skip:", err);
+            }
         }
     </script>
 </body>
