@@ -33,7 +33,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
             perspective: 1200px; 
         }
@@ -146,6 +147,7 @@
             max-width: 900px;
             padding: 20px;
             text-align: center;
+            display: none;
         }
 
         h1 {
@@ -176,7 +178,7 @@
         #word-UNO { display: inline-block; }
         #word-UNO.pop-in {
             animation: letterPop 0.45s cubic-bezier(0.34, 1.75, 0.64, 1) forwards, 
-                        unoChoppyLoop 1.0s steps(1) infinite;
+                       unoChoppyLoop 1.0s steps(1) infinite;
             animation-delay: 0s, 0.45s;
         }
 
@@ -214,7 +216,6 @@
         }
 
         .view-panel.centered-layout {
-            display: none;
             grid-template-columns: 1fr;
             max-width: 500px;
         }
@@ -291,7 +292,7 @@
         .game-card:hover { transform: translateY(8px) scale(1.02) !important; box-shadow: var(--card-shadow-hover); }
         .game-card:hover i { transform: scale(1.2) rotate(-8deg); }
         .game-card:hover .numeric { transform: scale(1.2) translateY(-4px); }
-        .game-card:active { transform: translateY(16px) scale(0.99) !important; box-shadow: 0 0px 0px transparent; }
+        .game-card:active { transform: translateY(16px) scale(0.99) !important; box-shadow: 0 0px 0 transparent; }
 
         .form-panel {
             background: #ffffff;
@@ -312,18 +313,6 @@
         }
 
         .form-panel h3 { font-size: 26px; margin-bottom: 15px; color: #1e293b; letter-spacing: 0.5px; }
-        
-        .code-display {
-            font-size: 34px;
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 16px;
-            border: 3px dashed #cbd5e1;
-            margin: 15px 0 25px 0;
-            color: #0f172a;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
 
         .input-group {
             position: relative;
@@ -362,6 +351,7 @@
             cursor: pointer;
             text-align: center;
             transition: border-color 0.2s ease;
+            margin-bottom: 20px;
         }
         .file-upload-container:hover { border-color: var(--u-blue); }
         .file-upload-container input[type="file"] {
@@ -370,39 +360,6 @@
             opacity: 0; cursor: pointer;
         }
         .file-upload-text { font-size: 14px; color: #64748b; }
-
-        .session-roster {
-            background: #f1f5f9;
-            border-radius: 18px;
-            padding: 15px;
-            max-height: 180px;
-            overflow-y: auto;
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .roster-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            font-size: 16px;
-            border-left: 5px solid #cbd5e1;
-        }
-        .roster-item.user-player { border-left-color: var(--u-blue); color: var(--u-blue); }
-        .roster-item.bot-player { border-left-color: var(--y-yellow); }
-        .roster-item .status-badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: #e2e8f0;
-            color: #64748b;
-        }
-        .roster-item.active-connected .status-badge { background: #dcfce7; color: #15803d; }
 
         .btn-action {
             width: 100%;
@@ -420,16 +377,7 @@
         .btn-action:hover { transform: translateY(2px); box-shadow: 0 4px 0 #16a34a; }
         .btn-action:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent; }
 
-        .btn-action.btn-disabled {
-            background: #cbd5e1 !important;
-            box-shadow: 0 6px 0 #94a3b8 !important;
-            color: #64748b;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
         .back-container {
-            grid-column: 1 / -1;
             margin-top: 30px;
             display: flex;
             justify-content: center;
@@ -455,28 +403,32 @@
         .btn-back:hover { transform: translateY(2px); box-shadow: 0 4px 0 #1e293b; background: linear-gradient(135deg, #64748b, #475569); }
         .btn-back:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent; }
 
-        /* Arena Gameplay Styles */
+        /* Arena Gameplay Panels */
         .arena-panel {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.75);
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-radius: 32px;
             padding: 25px;
             box-shadow: var(--card-shadow);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
         }
         .arena-status {
             font-size: 16px;
             color: #cbd5e1;
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
+            background: rgba(0,0,0,0.4);
+            padding: 14px;
             border-radius: 14px;
             margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .arena-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
             margin-bottom: 25px;
         }
@@ -505,11 +457,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .node-tag {
-            font-size: 11px;
-            color: var(--y-yellow);
-            display: block;
-        }
         .node-avatar-frame {
             width: 55px;
             height: 55px;
@@ -528,8 +475,8 @@
             object-fit: cover;
         }
         .node-avatar-fallback {
-            font-size: 20px;
-            color: #64748b;
+            font-size: 22px;
+            color: #94a3b8;
         }
         .node-count {
             font-size: 12px;
@@ -538,55 +485,80 @@
             padding: 2px 8px;
             border-radius: 10px;
             display: inline-block;
+            margin-top: 4px;
         }
         .arena-table {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
             border-radius: 24px;
-            padding: 20px;
+            padding: 30px;
             margin-bottom: 25px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            justify-content: center;
             align-items: center;
+            gap: 40px;
+        }
+        .arena-deck-pile {
+            width: 85px;
+            height: 130px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: 4px solid #fff;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            transform: rotate(-5deg);
+            transition: transform 0.2s ease;
+        }
+        .arena-deck-pile:hover {
+            transform: scale(1.05) rotate(-2deg);
         }
         .arena-discard {
-            width: 80px;
-            height: 120px;
+            width: 85px;
+            height: 130px;
             border-radius: 14px;
             border: 5px solid #ffffff;
-            background: #ffffff;
-            color: #0f172a;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
-            line-height: 110px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            transition: background 0.3s ease;
         }
         .arena-hand-container {
             background: rgba(0,0,0,0.4);
             border-radius: 24px;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 20px;
-            min-height: 150px;
         }
         .arena-hand-title {
             font-size: 14px;
-            color: #64748b;
-            margin-bottom: 10px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .arena-hand-cards {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
         .arena-card {
-            width: 70px;
-            height: 105px;
+            width: 75px;
+            height: 115px;
             background: #ffffff;
             border-radius: 12px;
             border: 4px solid #ffffff;
             color: #0f172a;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -596,12 +568,43 @@
             transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
         .arena-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 0px rgba(0,0,0,0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 14px 0px rgba(0,0,0,0.3);
         }
-        .arena-card:active {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
+        
+        /* Card Background Colors mapping */
+        .color-blue { background-color: var(--u-blue) !important; color: white !important; }
+        .color-green { background-color: var(--n-green) !important; color: white !important; }
+        .color-red { background-color: var(--o-red) !important; color: white !important; }
+        .color-yellow { background-color: var(--y-yellow) !important; color: black !important; }
+        .color-wild { background-color: #2c3e50 !important; color: white !important; border-color: #8e44ad !important;}
+
+        /* Color Overlay Modals */
+        #colorPickerModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .picker-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 25px;
+            background: #1e293b;
+            border-radius: 24px;
+            border: 3px solid rgba(255,255,255,0.1);
+        }
+        .picker-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 16px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
         }
 
         @keyframes cardFlipIn {
@@ -630,7 +633,7 @@
     <div class="bg-shape shape-3"></div>
     <div class="bg-shape shape-4"></div>
 
-    <div class="container">
+    <div class="container" id="gameContainer">
         <h1 id="titleHeader">
             <span id="letter-E">E</span>
             <span id="letter-L">L</span>
@@ -643,7 +646,7 @@
             </span>
         </h1>
 
-        <div id="mainMenu" class="view-panel">
+        <div id="mainMenu" class="view-panel active-view">
             <div class="game-card card-blue" onclick="switchView('botsMenu')">
                 <i class="fas fa-robot"></i>
                 <span>Play With Bots</span>
@@ -655,544 +658,274 @@
         </div>
 
         <div id="botsMenu" class="view-panel">
-            <div class="game-card card-blue" onclick="initializeBotMatch(1)">
-                <span class="numeric">1</span>
-                <span>1 Bot</span>
-            </div>
-            <div class="game-card card-green" onclick="initializeBotMatch(2)">
-                <span class="numeric">2</span>
-                <span>2 Bots</span>
-            </div>
-            <div class="game-card card-yellow" onclick="initializeBotMatch(3)">
-                <span class="numeric">3</span>
-                <span>3 Bots</span>
+            <div class="game-card card-blue" onclick="switchView('profileSetupMenu')">
+                <span class="numeric"><i class="fas fa-user-plus"></i></span>
+                <span>Configure Profile Match</span>
             </div>
             <div class="back-container">
-                <button class="btn-back" onclick="switchView('mainMenu')">
-                    <i class="fas fa-arrow-left"></i>Go Back
-                </button>
+                <button class="btn-back" onclick="switchView('mainMenu')"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+        </div>
+
+        <div id="profileSetupMenu" class="view-panel centered-layout">
+            <div class="form-panel">
+                <h3>Match Profile Identity</h3>
+                <div class="input-group">
+                    <label>In-game Tag Handle</label>
+                    <input type="text" id="usernameInput" class="room-input" placeholder="Leave empty for Guest...">
+                </div>
+                <div class="input-group">
+                    <label>Profile Email (Verified Verification Check)</label>
+                    <input type="email" id="emailInput" class="room-input" placeholder="yourname@domain.com">
+                </div>
+                <div class="input-group">
+                    <label>Custom Profile Picture File</label>
+                    <div class="file-upload-container">
+                        <span class="file-upload-text" id="uploadLabelText">Select Custom Image Asset...</span>
+                        <input type="file" id="avatarFileInput" accept="image/*" onchange="processAvatarUpload(this)">
+                    </div>
+                </div>
+                <button class="btn-action" onclick="launchBotMatchEngine()">INITIALIZE MATCH</button>
+            </div>
+            <div class="back-container">
+                <button class="btn-back" onclick="switchView('botsMenu')"><i class="fas fa-arrow-left"></i> Back</button>
             </div>
         </div>
 
         <div id="onlineMenu" class="view-panel centered-layout">
-            <div class="form-panel" style="border-color: var(--u-blue);">
-                <h3>PLAYER ARCHITECTURE</h3>
-                
-                <div class="input-group">
-                    <label for="usernameInput">Display Name</label>
-                    <input type="text" id="usernameInput" class="room-input" placeholder="ENTER USERNAME" autocomplete="off">
-                </div>
+            <div class="form-panel">
+                <h3>Online Servers Currently Full</h3>
+                <p style="color: #64748b; margin-bottom: 20px;">Standard matching networks are currently occupied.</p>
+                <button class="btn-action" onclick="switchView('mainMenu')">RETURN TO THE HUB</button>
+            </div>
+        </div>
 
-                <div class="input-group">
-                    <label for="emailInput">Email Configuration (Optional)</label>
-                    <input type="text" id="emailInput" class="room-input" style="font-size:15px;" placeholder="verification@domain.com" autocomplete="off">
+        <div id="arenaPanel" class="arena-panel">
+            <div class="arena-status" id="statusBox">Awaiting initialization variables...</div>
+            <div class="arena-grid" id="playersGrid">
                 </div>
-
-                <div class="input-group">
-                    <label>Custom Profile Avatar Image</label>
-                    <div class="file-upload-container">
-                        <span class="file-upload-text" id="fileStatusText">Drop image file here or browse</span>
-                        <input type="file" id="avatarUpload" accept="image/*" onchange="updateFileLabelText()">
+            <div class="arena-table">
+                <div class="arena-deck-pile" onclick="drawCardFromDeck()">DECK</div>
+                <div class="arena-discard" id="discardPileCard"></div>
+            </div>
+            <div class="arena-hand-container">
+                <div class="arena-hand-title">Your Playable Hand</div>
+                <div class="arena-hand-cards" id="playerHandCards">
                     </div>
-                </div>
-
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
-                    <button class="btn-action" style="background:var(--u-blue); box-shadow:0 6px 0 #0093b8;" onclick="processLobbyAction('create')">MAKE ROOM</button>
-                    <button class="btn-action" style="background:var(--o-red); box-shadow:0 6px 0 #c0392b;" onclick="processLobbyAction('join_view')">JOIN ROOM</button>
-                </div>
             </div>
-            <div class="back-container">
-                <button class="btn-back" onclick="switchView('mainMenu')">
-                    <i class="fas fa-arrow-left"></i>Go Back
-                </button>
-            </div>
-        </div>
-
-        <div id="makeRoomPanel" class="view-panel centered-layout">
-            <div class="form-panel" style="border-color: var(--u-blue);">
-                <h3>ROOM CREATOR</h3>
-                <p style="color: #64748b; font-size:14px;">Share this code with your friends:</p>
-                <div class="code-display" id="generatedRoomCode">--------</div>
-                
-                <h4 style="text-align:left; margin-bottom:10px; font-size:15px; color:#475569;">LOBBY ROSTER:</h4>
-                <div class="session-roster" id="makeRoomRoster"></div>
-
-                <button class="btn-action" id="btnStartGame" onclick="launchMatchEngine()">START GAME</button>
-            </div>
-            <div class="back-container">
-                <button class="btn-back" onclick="terminateSession('onlineMenu')">
-                    <i class="fas fa-arrow-left"></i>Cancel Room
-                </button>
-            </div>
-        </div>
-
-        <div id="joinRoomPanel" class="view-panel centered-layout">
-            <div class="form-panel" style="border-color: var(--o-red);">
-                <h3>JOIN PRIVATE LOBBY</h3>
-                <div class="input-group">
-                    <input type="text" id="inputRoomCode" class="room-input" maxlength="8" placeholder="ENTER 8-DIGIT CODE" oninput="validateInputCode()">
-                </div>
-
-                <div id="joinRosterContainer" style="display: none; transform-origin: top center;">
-                    <h4 style="text-align:left; margin-bottom:10px; font-size:15px; color:#475569;">ROOM MEMBERS:</h4>
-                    <div class="session-roster" id="joinRoomRoster"></div>
-                </div>
-
-                <button class="btn-action btn-disabled" id="btnJoinLobby" onclick="executeLobbyJoin()">JOIN LOBBY</button>
-            </div>
-            <div class="back-container">
-                <button class="btn-back" onclick="terminateSession('onlineMenu')">
-                    <i class="fas fa-arrow-left"></i>Cancel Entry
-                </button>
-            </div>
-        </div>
-
-        <div id="gameScreenPanel" class="view-panel centered-layout">
-            <div class="arena-panel">
-                <div class="arena-status" id="arenaStatusMsg">Awaiting execution matrix sync...</div>
-                
-                <div class="arena-grid" id="arenaPlayersGrid"></div>
-                
-                <div class="arena-table">
-                    <p style="font-size:12px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Discard Stack</p>
-                    <div class="arena-discard" id="arenaTopDiscard">-</div>
-                </div>
-                
-                <div class="arena-hand-container">
-                    <div class="arena-hand-title">Your Playable Card Deck Matrix:</div>
-                    <div class="arena-hand-cards" id="arenaYourHand"></div>
-                </div>
-                
-                <div style="margin-top:15px;">
-                    <button class="btn-action" style="background:var(--u-blue); box-shadow:0 6px 0 #0093b8;" onclick="drawCardFromStack()">DRAW CARD MATRIX</button>
-                </div>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button class="btn-back" style="flex: 1; padding: 12px;" onclick="terminateMatchSession()">Forfeit Match</button>
             </div>
         </div>
 
     </div>
 
+    <div id="colorPickerModal">
+        <div class="picker-grid">
+            <button class="picker-btn color-blue" onclick="selectWildColor('blue')"></button>
+            <button class="picker-btn color-green" onclick="selectWildColor('green')"></button>
+            <button class="picker-btn color-red" onclick="selectWildColor('red')"></button>
+            <button class="picker-btn color-yellow" onclick="selectWildColor('yellow')"></button>
+        </div>
+    </div>
+
     <script>
-        const audioUrls = {
-            E: "https://mp3tourl.com/audio/1780086146620-4115871c-60f6-4c11-b084-f646a3a0cc5c.mp3",
-            L: "https://mp3tourl.com/audio/1780086347871-2d76deca-014a-4edf-b3f1-815fcf69c756.ogg",
-            I: "https://mp3tourl.com/audio/1780086363537-1d4cba28-0b0a-4951-a813-f6431d54f195.ogg",
-            A: "https://mp3tourl.com/audio/1780086515711-75a55ab2-de94-4951-86bc-d935bc50cee3.ogg",
-            S: "https://mp3tourl.com/audio/1780086397663-7c030948-3568-4f01-a87d-b3cd69a4546c.ogg",
-            UNO: "https://mp3tourl.com/audio/1780086634138-3c098ea5-eb0d-4c89-a7c1-d67a2bce18cd.ogg"
-        };
-
-        const botFirstNames = ["Slayer", "Shadow", "Glitch", "Alpha", "Hyper", "Blaze", "Retro", "Pixel", "Nova", "Cyber"];
-        const botLastNames = ["Bot", "AI", "Mech", "X", "Droid", "Runner", "Core", "Vortex", "Matrix", "Zero"];
-        
-        let activeSession = { roomCode: null, players: [], isHost: false };
-        let gameState = null;
-        let audioCtx = null;
-
-        function initAudioContext() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        function playLocalSfx(type) {
-            initAudioContext();
-            if (!audioCtx) return;
-            let osc = audioCtx.createOscillator();
-            let gainNode = audioCtx.createGain();
-            osc.type = type === 'hover' ? 'triangle' : 'sine';
-            let startFreq = type === 'hover' ? 340 : 200;
-            let endFreq = type === 'hover' ? 90 : 50;
-            let duration = type === 'hover' ? 0.09 : 0.16;
-            let vol = type === 'hover' ? 0.12 : 0.35;
-
-            osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
-            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
+        let currentUploadedAvatarBase64 = "";
+        let localPlayerHandReference = [];
+        let internalSelectedCardIndex = null;
+        let aiExecutionInterval = null;
 
         function startCinematicIntro() {
+            const overlay = document.getElementById('flashOverlay');
+            overlay.classList.add('flash-active');
+            
             document.getElementById('clickZone').style.display = 'none';
-            initAudioContext();
-
-            const sequence = [
-                { id: 'letter-E', key: 'E', delay: 100 },
-                { id: 'letter-L', key: 'L', delay: 600 },
-                { id: 'letter-I', key: 'I', delay: 1100 },
-                { id: 'letter-A', key: 'A', delay: 1600 },
-                { id: 'letter-S', key: 'S', delay: 2100 },
-                { id: 'word-UNO', key: 'UNO', delay: 2800 }
-            ];
-
-            sequence.forEach(item => {
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // Pop letters matching standard structure styling rules
+            const elements = document.querySelectorAll('h1 span');
+            elements.forEach((el, index) => {
                 setTimeout(() => {
-                    let sound = new Audio(audioUrls[item.key]);
-                    sound.play().catch(e => console.log("Blocked:", e));
-                    document.getElementById(item.id).classList.add('pop-in');
-                    if (item.key === 'UNO') { triggerScreenFlash(); }
-                }, item.delay);
+                    el.classList.add('pop-in');
+                }, index * 90);
             });
-        }
-
-        function triggerScreenFlash() {
-            setTimeout(() => {
-                const flash = document.getElementById('flashOverlay');
-                flash.classList.add('flash-active');
-                const mainMenu = document.getElementById('mainMenu');
-                mainMenu.classList.add('active-view');
-                setTimeout(() => { mainMenu.classList.add('reveal-cards'); }, 50);
-            }, 100); 
-        }
-
-        function switchView(targetId) {
-            playLocalSfx('click');
-            const activePanel = document.querySelector('.view-panel.active-view');
-            if (activePanel) {
-                activePanel.classList.remove('active-view', 'reveal-cards');
-            }
-            setTimeout(() => {
-                const targetPanel = document.getElementById(targetId);
-                if (targetPanel) {
-                    targetPanel.classList.add('active-view');
-                    setTimeout(() => { targetPanel.classList.add('reveal-cards'); }, 50);
-                }
-            }, 50);
-        }
-
-        function updateFileLabelText() {
-            const fileInput = document.getElementById('avatarUpload');
-            const statusLabel = document.getElementById('fileStatusText');
-            if (fileInput.files.length > 0) {
-                statusLabel.innerText = fileInput.files[0].name;
-                statusLabel.style.color = 'var(--u-blue)';
-            } else {
-                statusLabel.innerText = "Drop image file here or browse";
-                statusLabel.style.color = '#64748b';
-            }
-        }
-
-        function terminateSession(targetPanelId) {
-            activeSession = { roomCode: null, players: [], isHost: false };
-            document.getElementById('inputRoomCode').value = "";
-            document.getElementById('joinRosterContainer').style.display = "none";
-            switchView(targetPanelId);
-        }
-
-        function makeRandomCode(length) {
-            let result = '';
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
-        function makeRandomBotName() {
-            let fn = botFirstNames[Math.floor(Math.random() * botFirstNames.length)];
-            let ln = botLastNames[Math.floor(Math.random() * botLastNames.length)];
-            return `${fn} ${ln}`;
-        }
-
-        function renderRoster(domElementId) {
-            const container = document.getElementById(domElementId);
-            container.innerHTML = "";
-            activeSession.players.forEach(p => {
-                const item = document.createElement('div');
-                item.className = `roster-item active-connected ${p.isBot ? 'bot-player' : 'user-player'}`;
-                
-                const leftDiv = document.createElement('div');
-                leftDiv.innerHTML = `${p.isBot ? '<i class="fas fa-robot" style="margin-right:8px;"></i>' : '<i class="fas fa-user" style="margin-right:8px;"></i>'} <span>${p.name}</span>`;
-                
-                const rightSpan = document.createElement('span');
-                rightSpan.className = "status-badge";
-                rightSpan.innerText = p.isHost ? "HOST" : "READY";
-                
-                item.appendChild(leftDiv);
-                item.appendChild(rightSpan);
-                container.appendChild(item);
-            });
-        }
-
-        function initializeBotMatch(count) {
-            activeSession.roomCode = makeRandomCode(8);
-            activeSession.isHost = true;
-            activeSession.players = [{ name: "You (Player)", isBot: false, isHost: true }];
-            for(let i=0; i<count; i++) {
-                activeSession.players.push({ name: makeRandomBotName(), isBot: true, isHost: false });
-            }
-            switchView('makeRoomPanel');
-            document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
-            renderRoster('makeRoomRoster');
-            document.getElementById('btnStartGame').innerText = "START BOT MATCH";
-        }
-
-        async function processLobbyAction(actionType) {
-            const username = document.getElementById('usernameInput').value.trim() || "Guest Player";
-            const email = document.getElementById('emailInput').value.trim();
-            const fileInput = document.getElementById('avatarUpload');
-            let avatarData = null;
-
-            if (fileInput.files.length > 0) {
-                avatarData = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(fileInput.files[0]);
-                });
-            }
-
-            if (actionType === 'create') {
-                activeSession.roomCode = makeRandomCode(8);
-                activeSession.isHost = true;
-                activeSession.players = [{ name: username, isBot: false, isHost: true, avatar: avatarData }];
-                
-                try {
-                    const response = await fetch('/api/start_game', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username, email: email, avatar_source: avatarData })
-                    });
-                    if (response.ok) {
-                        gameState = await response.json();
-                        switchView('makeRoomPanel');
-                        document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
-                        renderRoster('makeRoomRoster');
-                        document.getElementById('btnStartGame').innerText = "START GAME";
-                    }
-                } catch (e) {
-                    switchView('makeRoomPanel');
-                    document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
-                    renderRoster('makeRoomRoster');
-                }
-            } else if (actionType === 'join_view') {
-                switchView('joinRoomPanel');
-            }
-        }
-
-        function validateInputCode() {
-            const inputField = document.getElementById('inputRoomCode');
-            const joinBtn = document.getElementById('btnJoinLobby');
-            let code = inputField.value.trim().toUpperCase();
-            inputField.value = code;
-
-            if (code.length === 8) {
-                playLocalSfx('hover');
-                joinBtn.classList.remove('btn-disabled');
-                activeSession.roomCode = code;
-                activeSession.isHost = false;
-                activeSession.players = [
-                    { name: makeRandomBotName() + " (Host)", isBot: true, isHost: true },
-                    { name: makeRandomBotName(), isBot: true, isHost: false }
-                ];
-                renderRoster('joinRoomRoster');
-                document.getElementById('joinRosterContainer').style.display = "block";
-            } else {
-                joinBtn.classList.add('btn-disabled');
-                document.getElementById('joinRosterContainer').style.display = "none";
-            }
-        }
-
-        async function executeLobbyJoin() {
-            const joinBtn = document.getElementById('btnJoinLobby');
-            if (joinBtn.classList.contains('btn-disabled')) return;
-            playLocalSfx('click');
-
-            const username = document.getElementById('usernameInput').value.trim() || "Guest Player";
-            const email = document.getElementById('emailInput').value.trim();
-            activeSession.players.push({ name: username, isBot: false, isHost: false });
             
-            try {
-                const response = await fetch('/api/start_game', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username, email: email })
-                });
-                if (response.ok) {
-                    gameState = await response.json();
-                    enterMatchScreen();
-                }
-            } catch(e) {
-                enterMatchScreen();
+            setTimeout(() => {
+                document.getElementById('mainMenu').classList.add('reveal-cards');
+            }, 600);
+        }
+
+        function switchView(viewId) {
+            const panels = document.querySelectorAll('.view-panel, .arena-panel');
+            panels.forEach(p => {
+                p.classList.remove('active-view', 'reveal-cards');
+                p.style.display = 'none';
+            });
+            
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.style.display = target.classList.contains('arena-panel') ? 'block' : 'grid';
+                setTimeout(() => {
+                    target.classList.add('active-view', 'reveal-cards');
+                }, 50);
             }
         }
 
-        function launchMatchEngine() {
-            playLocalSfx('click');
-            enterMatchScreen();
-        }
-
-        function enterMatchScreen() {
-            if (!gameState) {
-                // Local fallback dataset matrix mapping architecture
-                gameState = {
-                    status_message: "match pipeline started locally.",
-                    top_discard: { value: "7", color: "blue" },
-                    current_turn: 0,
-                    game_over: false,
-                    players: activeSession.players.map((p, i) => ({
-                        name: p.name,
-                        is_owner: p.isHost,
-                        avatar: p.avatar || "",
-                        card_count: 7,
-                        hand: i === 0 ? [
-                            { value: "3", color: "blue" },
-                            { value: "7", color: "red" },
-                            { value: "Skip", color: "green" },
-                            { value: "5", color: "yellow" },
-                            { value: "Draw 2", color: "blue" }
-                        ] : []
-                    }))
+        function processAvatarUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUploadedAvatarBase64 = e.target.result;
+                    document.getElementById('uploadLabelText').innerText = "Custom Asset Loaded Successfully!";
                 };
-            }
-            switchView('gameScreenPanel');
-            renderArenaLayout();
-        }
-
-        function getColorHex(colorName) {
-            switch(colorName.toLowerCase()) {
-                case 'red': return 'var(--o-red)';
-                case 'blue': return 'var(--u-blue)';
-                case 'green': return 'var(--n-green)';
-                case 'yellow': return 'var(--y-yellow)';
-                default: return '#7b1fa2';
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function renderArenaLayout() {
-            if (!gameState) return;
+        function launchBotMatchEngine() {
+            const payload = {
+                username: document.getElementById('usernameInput').value,
+                email: document.getElementById('emailInput').value,
+                avatar_source: currentUploadedAvatarBase64
+            };
 
-            document.getElementById('arenaStatusMsg').innerText = gameState.status_message;
-            
-            const topCard = gameState.top_discard;
-            const discardDiv = document.getElementById('arenaTopDiscard');
-            if (topCard) {
-                discardDiv.innerText = topCard.value;
-                discardDiv.style.borderColor = getColorHex(topCard.color);
-                discardDiv.style.color = getColorHex(topCard.color);
-            }
+            fetch('/api/start_game', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(state => {
+                switchView('arenaPanel');
+                renderGameState(state);
+                initiateAIClockLoop();
+            });
+        }
 
-            const playersGrid = document.getElementById('arenaPlayersGrid');
-            playersGrid.innerHTML = '';
+        function renderGameState(state) {
+            document.getElementById('statusBox').innerText = state.status_message;
             
-            gameState.players.forEach((p, idx) => {
+            // Render active arena dashboard entities tracking counts
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = "";
+            
+            state.players.forEach((p, idx) => {
                 const node = document.createElement('div');
-                node.className = 'arena-node';
-                if (gameState.current_turn === idx && !gameState.game_over) {
-                    node.classList.add('active-turn');
-                }
+                node.className = `arena-node ${state.current_turn === idx ? 'active-turn' : ''}`;
                 
-                let avatarLayout = '';
-                if (p.avatar && p.avatar.length > 5) {
-                    avatarLayout = `<img class="node-avatar-img" src="${p.avatar}" alt="pfp">`;
-                } else {
-                    avatarLayout = `<i class="fas ${p.is_owner ? 'fa-user-crown' : 'fa-user'} node-avatar-fallback"></i>`;
+                let imageElementHtml = `<div class="node-avatar-fallback"><i class="fas fa-user-robot"></i></div>`;
+                if(p.avatar && p.avatar.length > 5) {
+                    imageElementHtml = `<img src="${p.avatar}" class="node-avatar-img" />`;
                 }
                 
                 node.innerHTML = `
-                    <span class="node-name">${p.name}</span>
-                    ${p.is_owner ? '<span class="node-tag">HOST</span>' : ''}
-                    <div class="node-avatar-frame">${avatarLayout}</div>
-                    <span class="node-count">Cards: ${p.card_count}</span>
+                    <span class="node-name">${p.name} ${p.is_owner ? '👑' : ''}</span>
+                    <div class="node-avatar-frame">${imageElementHtml}</div>
+                    <span class="node-count">${p.card_count} Cards</span>
                 `;
-                playersGrid.appendChild(node);
+                grid.appendChild(node);
             });
 
-            const handDiv = document.getElementById('arenaYourHand');
-            handDiv.innerHTML = '';
-            
-            const humanPlayer = gameState.players[0];
-            if (humanPlayer && humanPlayer.hand) {
-                humanPlayer.hand.forEach((card, idx) => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'arena-card';
-                    cardElement.innerText = card.value;
-                    cardElement.style.color = getColorHex(card.color);
-                    cardElement.style.borderColor = getColorHex(card.color);
-                    cardElement.onclick = () => playCardFromHand(idx);
-                    handDiv.appendChild(cardElement);
-                });
+            // Update top discard pile node parameters
+            const topDiscard = state.top_discard;
+            const discardNode = document.getElementById('discardPileCard');
+            if (topDiscard) {
+                discardNode.className = `arena-discard color-${topDiscard.color}`;
+                discardNode.innerText = topDiscard.value;
+            } else {
+                discardNode.className = "arena-discard";
+                discardNode.innerText = "";
             }
 
-            if (gameState.current_turn !== 0 && !gameState.game_over) {
-                setTimeout(triggerAiTurnRoutine, 1500);
+            // Repopulate interactive player inventory fields
+            const handContainer = document.getElementById('playerHandCards');
+            handContainer.innerHTML = "";
+            localPlayerHandReference = state.players[0].hand || [];
+
+            localPlayerHandReference.forEach((card, index) => {
+                const cardButton = document.createElement('div');
+                cardButton.className = `arena-card color-${card.color}`;
+                cardButton.innerText = card.value;
+                cardButton.onclick = () => attemptToPlayCard(index);
+                handContainer.appendChild(cardButton);
+            });
+
+            if (state.game_over) {
+                clearInterval(aiExecutionInterval);
+                alert(`Match Concluded! Winner: ${state.winner}`);
+                terminateMatchSession();
             }
         }
 
-        async function playCardFromHand(cardIdx) {
-            if (gameState.current_turn !== 0) { return; }
-            playLocalSfx('click');
+        function attemptToPlayCard(index) {
+            const card = localPlayerHandReference[index];
+            if (!card) return;
 
-            try {
-                const response = await fetch('/api/play_card', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ player_idx: 0, card_idx: cardIdx })
-                });
-                if (response.ok) {
-                    gameState = await response.json();
-                    renderArenaLayout();
-                    return;
-                }
-            } catch (e) {}
-
-            // Local simulation fallback handling logic
-            let myHand = gameState.players[0].hand;
-            let playedCard = myHand[cardIdx];
-            gameState.top_discard = playedCard;
-            myHand.splice(cardIdx, 1);
-            gameState.players[0].card_count = myHand.length;
-            gameState.current_turn = 1;
-            gameState.status_message = "You played a card. Bot turn processing...";
-            renderArenaLayout();
+            if (card.color === 'wild') {
+                internalSelectedCardIndex = index;
+                document.getElementById('colorPickerModal').style.display = 'flex';
+            } else {
+                executePlayAction(index, null);
+            }
         }
 
-        async function drawCardFromStack() {
-            if (gameState.current_turn !== 0) return;
-            playLocalSfx('hover');
-
-            try {
-                const response = await fetch('/api/draw_card', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ player_idx: 0 })
-                });
-                if (response.ok) {
-                    gameState = await response.json();
-                    renderArenaLayout();
-                    return;
-                }
-            } catch (e) {}
-
-            // Local fallback pulling simulation logic
-            gameState.players[0].hand.push({ value: Math.floor(Math.random()*10).toString(), color: "red" });
-            gameState.players[0].card_count = gameState.players[0].hand.length;
-            gameState.current_turn = 1;
-            gameState.status_message = "You drew a card from stack matrix.";
-            renderArenaLayout();
+        function selectWildColor(color) {
+            document.getElementById('colorPickerModal').style.display = 'none';
+            if (internalSelectedCardIndex !== null) {
+                executePlayAction(internalSelectedCardIndex, color);
+                internalSelectedCardIndex = null;
+            }
         }
 
-        async function triggerAiTurnRoutine() {
-            if (gameState.game_over) return;
+        function executePlayAction(cardIdx, color) {
+            fetch('/api/play_card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    player_idx: 0,
+                    card_idx: cardIdx,
+                    chosen_color: color
+                })
+            })
+            .then(res => {
+                if (!res.ok) return res.json().then(err => { throw new Error(err.error) });
+                return res.json();
+            })
+            .then(state => {
+                renderGameState(state);
+            })
+            .catch(err => alert(err.message));
+        }
 
-            try {
-                const response = await fetch('/api/ai_turn', { method: 'POST' });
-                if (response.ok) {
-                    gameState = await response.json();
-                    renderArenaLayout();
-                    return;
-                }
-            } catch (e) {}
+        function drawCardFromDeck() {
+            fetch('/api/draw_card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ player_idx: 0 })
+            })
+            .then(res => res.json())
+            .then(state => {
+                renderGameState(state);
+            });
+        }
 
-            // Local simulation routine logic
-            let botIdx = gameState.current_turn;
-            gameState.players[botIdx].card_count -= 1;
-            gameState.status_message = `${gameState.players[botIdx].name} completed pipeline execution.`;
-            
-            let nextTurn = botIdx + 1;
-            if (nextTurn >= gameState.players.length) { nextTurn = 0; }
-            gameState.current_turn = nextTurn;
-            renderArenaLayout();
+        function initiateAIClockLoop() {
+            clearInterval(aiExecutionInterval);
+            aiExecutionInterval = setInterval(() => {
+                // Poll backend check logic to ascertain if automated entities hold authority
+                fetch('/api/ai_turn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => {
+                    if (res.ok) return res.json().then(state => renderGameState(state));
+                });
+            }, 3000);
+        }
+
+        function terminateMatchSession() {
+            clearInterval(aiExecutionInterval);
+            switchView('mainMenu');
         }
     </script>
 </body>
