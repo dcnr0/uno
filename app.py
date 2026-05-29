@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import base64
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -158,6 +159,9 @@ def play_card():
         return jsonify({"error": "Not your turn!"}), 400
         
     player = game_state["players"][player_idx]
+    if card_idx is None or card_idx >= len(player["hand"]):
+        return jsonify({"error": "Invalid card index!"}), 400
+        
     card = player["hand"][card_idx]
     
     if not is_playable(card):
@@ -170,8 +174,8 @@ def play_card():
     msg = f"{player['name']} played a {card['color']} {card['value']}."
     
     if card["color"] == "wild":
-        game_state["current_color"] = chosen_color if chosen_color else random.choice(COLORS)
-        msg = f"{player['name']} changed active color to {game_state['current_color']}!"
+        game_state["current_color"] = chosen_color if chosen_color in COLORS else random.choice(COLORS)
+        msg = f"{player['name']} played a Wild and changed active color to {game_state['current_color']}!"
     else:
         game_state["current_color"] = card["color"]
         
@@ -218,16 +222,19 @@ def draw_card():
         
     player = game_state["players"][player_idx]
     if not game_state["deck"]:
-        top = game_state["discard_pile"].pop()
-        game_state["deck"] = game_state["discard_pile"]
-        random.shuffle(game_state["deck"])
-        game_state["discard_pile"] = [top]
+        if len(game_state["discard_pile"]) > 1:
+            top = game_state["discard_pile"].pop()
+            game_state["deck"] = game_state["discard_pile"]
+            random.shuffle(game_state["deck"])
+            game_state["discard_pile"] = [top]
+        else:
+            game_state["deck"] = generate_deck()
         
     drawn = game_state["deck"].pop()
     player["hand"].append(drawn)
     
     if is_playable(drawn):
-        game_state["status_message"] = f"{player['name']} drew a playable card!"
+        game_state["status_message"] = f"{player['name']} drew a card and it can be played!"
     else:
         game_state["status_message"] = f"{player['name']} drew a card and skipped."
         advance_turn()
@@ -248,11 +255,84 @@ def ai_turn():
             break
             
     if playable_idx != -1:
-        request.json = {"player_idx": current_idx, "card_idx": playable_idx, "chosen_color": random.choice(COLORS)}
-        return play_card()
+        # Simulate local modifications to internal endpoint values cleanly
+        card = bot["hand"][playable_idx]
+        chosen_color = random.choice(COLORS)
+        bot["hand"].pop(playable_idx)
+        game_state["discard_pile"].append(card)
+        game_state["current_value"] = card["value"]
+        msg = f"{bot['name']} played a {card['color']} {card['value']}."
+        
+        if card["color"] == "wild":
+            game_state["current_color"] = chosen_color
+            msg = f"{bot['name']} played a Wild and changed active color to {chosen_color}!"
+        else:
+            game_state["current_color"] = card["color"]
+            
+        if len(bot["hand"]) == 0:
+            game_state["game_over"] = True
+            game_state["winner"] = bot["name"]
+            game_state["status_message"] = f"Game Complete! {bot['name']} dominated the match!"
+            return jsonify(get_clean_state())
+
+        if card["value"] == "Reverse":
+            game_state["direction"] *= -1
+            msg += " Order reversed!"
+            advance_turn()
+        elif card["value"] == "Skip":
+            msg += " Next player skipped!"
+            advance_turn()
+            advance_turn()
+        elif card["value"] == "+2":
+            advance_turn()
+            next_p = game_state["players"][game_state["current_turn"]]
+            for _ in range(2):
+                if game_state["deck"]: next_p["hand"].append(game_state["deck"].pop())
+            msg += f" {next_p['name']} draws 2 cards and skips!"
+            advance_turn()
+        elif card["value"] == "+4":
+            advance_turn()
+            next_p = game_state["players"][game_state["current_turn"]]
+            for _ in range(4):
+                if game_state["deck"]: next_p["hand"].append(game_state["deck"].pop())
+            msg += f" {next_p['name']} draws 4 cards and skips!"
+            advance_turn()
+        else:
+            advance_turn()
+
+        game_state["status_message"] = msg
+        return jsonify(get_clean_state())
     else:
-        request.json = {"player_idx": current_idx}
-        return draw_card()
+        if not game_state["deck"]:
+            if len(game_state["discard_pile"]) > 1:
+                top = game_state["discard_pile"].pop()
+                game_state["deck"] = game_state["discard_pile"]
+                random.shuffle(game_state["deck"])
+                game_state["discard_pile"] = [top]
+            else:
+                game_state["deck"] = generate_deck()
+                
+        drawn = game_state["deck"].pop()
+        bot["hand"].append(drawn)
+        
+        if is_playable(drawn):
+            # Play immediately if bot draws a valid option
+            card_idx = len(bot["hand"]) - 1
+            card = bot["hand"].pop(card_idx)
+            game_state["discard_pile"].append(card)
+            game_state["current_value"] = card["value"]
+            msg = f"{bot['name']} drew and played a {card['color']} {card['value']}."
+            if card["color"] == "wild":
+                game_state["current_color"] = random.choice(COLORS)
+            else:
+                game_state["current_color"] = card["color"]
+            advance_turn()
+            game_state["status_message"] = msg
+        else:
+            game_state["status_message"] = f"{bot['name']} drew a card and skipped."
+            advance_turn()
+            
+        return jsonify(get_clean_state())
 
 with app.app_context():
     db.create_all()
