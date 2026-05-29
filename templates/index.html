@@ -3,424 +3,1125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>uno</title>
+    <title>uno arena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --bg-dark: #0f172a;
+            --u-blue: #00b4d8;
+            --n-green: #2ecc71;
+            --o-red: #e74c3c;
+            --y-yellow: #f1c40f;
+            --card-shadow: 0 16px 0px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 8px 0px rgba(0, 0, 0, 0.4);
+        }
+
         * {
             box-sizing: border-box;
-        }
-        body {
-            font-family: 'Courier New', monospace;
-            background: #0a0a0a;
-            color: #d4d4d4;
-            text-align: center;
+            user-select: none;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
-        .container {
-            max-width: 650px;
-            margin: 40px auto;
-            background: #000000;
-            padding: 30px;
-            border: 1px solid #222222;
-        }
-        h1 {
-            color: #e51c23;
-            font-size: 1.8em;
-            letter-spacing: -1px;
-            margin-top: 0;
-            text-transform: lowercase;
-        }
-        p {
-            font-size: 0.9em;
-            color: #888888;
-            margin: 15px 0;
-        }
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-            width: 85%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        label {
-            display: block;
-            font-size: 0.8em;
-            color: #666666;
-            margin-bottom: 5px;
-            text-transform: lowercase;
-        }
-        input[type="text"], input[type="email"] {
-            width: 100%;
-            padding: 10px;
-            background: #111111;
-            border: 1px solid #262626;
+
+        body {
+            font-family: 'Fredoka One', cursive;
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
             color: #ffffff;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            outline: none;
-        }
-        input[type="text"]:focus, input[type="email"]:focus {
-            border-color: #444444;
-        }
-        .file-upload-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
             position: relative;
-            background: #111111;
-            border: 1px dashed #262626;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
+            perspective: 1200px; 
         }
-        .file-upload-wrapper:hover {
-            border-color: #444444;
-        }
-        input[type="file"] {
+
+        body::before {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
+            background: 
+                linear-gradient(rgba(18, 24, 38, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 100% 4px, 40px 40px, 40px 40px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .bg-shape {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .shape-1 { width: 120px; height: 180px; top: 10%; left: 8%; transform: rotate(15deg); animation: float1 14s infinite ease-in-out; }
+        .shape-2 { width: 150px; height: 220px; bottom: 10%; right: 8%; transform: rotate(-20deg); animation: float2 18s infinite ease-in-out; }
+        .shape-3 { width: 90px; height: 90px; border-radius: 50%; top: 70%; left: 15%; animation: float1 11s infinite ease-in-out; }
+        .shape-4 { width: 100px; height: 100px; top: 20%; right: 18%; transform: rotate(45deg); animation: float2 15s infinite ease-in-out; }
+
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0) rotate(15deg) scale(1); }
+            50% { transform: translateY(-25px) rotate(25deg) scale(1.05); }
+        }
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0) rotate(-20deg) scale(1); }
+            50% { transform: translateY(30px) rotate(-10deg) scale(0.95); }
+        }
+
+        #flashOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            z-index: 9999;
             opacity: 0;
+            pointer-events: none;
+        }
+        .flash-active {
+            animation: flashFadeOut 0.6s ease-out forwards;
+        }
+        @keyframes flashFadeOut {
+            0% { opacity: 1; filter: blur(0px); }
+            100% { opacity: 0; filter: blur(10px); }
+        }
+
+        #clickZone {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 12, 21, 0.85);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
-        .file-label-text {
-            font-size: 0.8em;
-            color: #666666;
-            text-transform: lowercase;
-        }
-        button {
-            background: #000000;
-            color: #ffffff;
-            border: 1px solid #e51c23;
-            padding: 10px 24px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            text-transform: lowercase;
-            margin-top: 10px;
-            transition: background 0.15s ease;
-        }
-        button:hover {
-            background: #e51c23;
-            color: #000000;
-        }
-        .hidden {
-            display: none !important;
-        }
-        /* Arena Layout Styles */
-        .status-box {
-            font-size: 0.85em;
-            color: #888888;
-            border: 1px solid #1a1a1a;
-            padding: 12px;
-            margin-bottom: 25px;
-            background: #050505;
-        }
-        .players-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        .player-node {
-            background: #0a0a0a;
-            border: 1px solid #1f1f1f;
-            padding: 10px;
+
+        .click-card-frame {
+            padding: 40px 60px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            text-align: center;
             position: relative;
+            overflow: hidden;
         }
-        .player-node.active-turn {
-            border-color: #e51c23;
+        .click-card-frame::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            animation: shine 3s infinite;
         }
-        .player-name {
-            font-size: 0.8em;
+        @keyframes shine { 100% { transform: translateX(100%); } }
+
+        #clickZone i {
+            font-size: 50px;
+            color: var(--u-blue);
+            margin-bottom: 20px;
+            animation: bounceIcon 2s infinite ease-in-out;
+        }
+        #clickZone h2 {
+            font-size: 26px;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.1); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(45px, 8vw, 85px);
+            margin-bottom: 55px;
+            letter-spacing: 2px;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        h1 span {
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0.2);
+            text-shadow: 
+                -5px -5px 0 #fff,  5px -5px 0 #fff, -5px  5px 0 #fff,  5px  5px 0 #fff,
+                -5px  0px 0 #fff,  5px  0px 0 #fff,  0px -5px 0 #fff,  0px  5px 0 #fff,
+                0px 16px 24px rgba(0,0,0,0.7);
+        }
+
+        h1 span.pop-in {
+            animation: letterPop 0.45s cubic-bezier(0.34, 1.75, 0.64, 1) forwards;
+        }
+
+        #word-UNO { display: inline-block; }
+        #word-UNO.pop-in {
+            animation: letterPop 0.45s cubic-bezier(0.34, 1.75, 0.64, 1) forwards, 
+                        unoChoppyLoop 1.0s steps(1) infinite;
+            animation-delay: 0s, 0.45s;
+        }
+
+        #word-UNO span {
+            opacity: 1;
+            transform: none;
+            text-shadow: 
+                -4px -4px 0 #000,  4px -4px 0 #000, -4px  4px 0 #000,  4px  4px 0 #000,
+                -4px  0px 0 #000,  4px  0px 0 #000,  0px -4px 0 #000,  0px  4px 0 #000,
+                0px 10px 20px rgba(0,0,0,0.6);
+        }
+
+        .u-blue { color: var(--u-blue); }
+        .n-green { color: var(--n-green); }
+        .o-red { color: var(--o-red); }
+
+        @keyframes letterPop {
+            0% { transform: scale(0.2) translateY(40px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes unoChoppyLoop {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        .view-panel {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            justify-content: center;
+            max-width: 750px;
+            margin: 0 auto;
+            transform-style: preserve-3d;
+        }
+
+        .view-panel.centered-layout {
+            display: none;
+            grid-template-columns: 1fr;
+            max-width: 500px;
+        }
+
+        .view-panel.active-view {
+            display: grid;
+        }
+
+        .game-card {
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 28px;
+            padding: 40px 25px;
+            border: 6px solid #ffffff;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            overflow: hidden;
+            opacity: 0;
+            transform: rotateX(-90deg) translateY(80px);
+            transform-origin: top center;
+            backface-visibility: hidden;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .game-card::after {
+            content: 'UNO';
+            position: absolute;
+            bottom: -15px;
+            right: -10px;
+            font-size: 44px;
+            opacity: 0.06;
+            transform: rotate(-15deg);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .game-card:hover::after { transform: scale(1.2) rotate(-25deg); opacity: 0.12; }
+
+        .reveal-cards .game-card {
+            animation: cardFlipIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        }
+        .reveal-cards .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .reveal-cards .game-card:nth-child(2) { animation-delay: 0.2s; }
+        .reveal-cards .game-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border: 3px dashed rgba(15, 23, 42, 0.12);
+            border-radius: 18px;
+            pointer-events: none;
+            transition: inset 0.2s ease;
+        }
+        .game-card:hover::before { inset: 8px; }
+
+        .game-card i, .game-card .numeric {
+            font-size: 52px;
+            margin-bottom: 20px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.5);
+            display: block;
+        }
+        .game-card span { font-size: 22px; display: block; font-weight: bold; }
+
+        .card-blue  { border-color: var(--u-blue);   color: var(--u-blue); }
+        .card-green { border-color: var(--n-green);  color: var(--n-green); }
+        .card-red   { border-color: var(--o-red);    color: var(--o-red); }
+        .card-yellow{ border-color: var(--y-yellow); color: var(--y-yellow); }
+
+        .game-card:hover { transform: translateY(8px) scale(1.02) !important; box-shadow: var(--card-shadow-hover); }
+        .game-card:hover i { transform: scale(1.2) rotate(-8deg); }
+        .game-card:hover .numeric { transform: scale(1.2) translateY(-4px); }
+        .game-card:active { transform: translateY(16px) scale(0.99) !important; box-shadow: 0 0px 0px transparent; }
+
+        .form-panel {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 35px;
+            color: #0f172a;
+            border: 6px solid var(--u-blue);
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8) translateY(40px);
+        }
+        .reveal-cards .form-panel {
+            animation: panelFadePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        }
+        @keyframes panelFadePop {
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .form-panel h3 { font-size: 26px; margin-bottom: 15px; color: #1e293b; letter-spacing: 0.5px; }
+        
+        .code-display {
+            font-size: 34px;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 16px;
+            border: 3px dashed #cbd5e1;
+            margin: 15px 0 25px 0;
+            color: #0f172a;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 15px 0 20px 0;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+        .room-input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 18px;
+            border-radius: 16px;
+            border: 4px solid #cbd5e1;
+            font-family: 'Fredoka One', cursive;
+            text-align: center;
+            letter-spacing: 1px;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .room-input:focus { border-color: var(--u-blue); }
+        .room-input::placeholder { color: #cbd5e1; font-size: 16px; }
+
+        .file-upload-container {
+            background: #f8fafc;
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 15px;
+            position: relative;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.2s ease;
+        }
+        .file-upload-container:hover { border-color: var(--u-blue); }
+        .file-upload-container input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+        .file-upload-text { font-size: 14px; color: #64748b; }
+
+        .session-roster {
+            background: #f1f5f9;
+            border-radius: 18px;
+            padding: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .roster-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 16px;
+            border-left: 5px solid #cbd5e1;
+        }
+        .roster-item.user-player { border-left-color: var(--u-blue); color: var(--u-blue); }
+        .roster-item.bot-player { border-left-color: var(--y-yellow); }
+        .roster-item .status-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        .roster-item.active-connected .status-badge { background: #dcfce7; color: #15803d; }
+
+        .btn-action {
+            width: 100%;
+            background: var(--n-green);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #16a34a;
+            transition: all 0.1s ease;
+        }
+        .btn-action:hover { transform: translateY(2px); box-shadow: 0 4px 0 #16a34a; }
+        .btn-action:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent; }
+
+        .btn-action.btn-disabled {
+            background: #cbd5e1 !important;
+            box-shadow: 0 6px 0 #94a3b8 !important;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .back-container {
+            grid-column: 1 / -1;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+        }
+        .reveal-cards .back-container { animation: fadeInElement 0.4s ease forwards; animation-delay: 0.4s; }
+
+        .btn-back {
+            background: linear-gradient(135deg, #475569, #334155);
+            color: #ffffff;
+            border: 3px solid rgba(255,255,255,0.1);
+            padding: 16px 45px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1e293b;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-back:hover { transform: translateY(2px); box-shadow: 0 4px 0 #1e293b; background: linear-gradient(135deg, #64748b, #475569); }
+        .btn-back:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent; }
+
+        /* Arena Gameplay Styles */
+        .arena-panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .arena-status {
+            font-size: 16px;
+            color: #cbd5e1;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .arena-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .arena-node {
+            background: #1e293b;
+            border: 4px solid #334155;
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            transition: border-color 0.2s ease;
+        }
+        .arena-node.active-turn {
+            border-color: var(--u-blue);
+            animation: pulseActiveBorder 1.5s infinite alternate;
+        }
+        @keyframes pulseActiveBorder {
+            from { border-color: var(--u-blue); box-shadow: 0 0 4px var(--u-blue); }
+            to { border-color: #00f5ff; box-shadow: 0 0 16px #00f5ff; }
+        }
+        .node-name {
+            font-size: 14px;
             font-weight: bold;
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .owner-tag {
-            color: #ffb300;
-            font-size: 0.7em;
+        .node-tag {
+            font-size: 11px;
+            color: var(--y-yellow);
             display: block;
-            margin-top: 2px;
         }
-        .avatar-frame {
-            width: 50px;
-            height: 50px;
+        .node-avatar-frame {
+            width: 55px;
+            height: 55px;
             margin: 8px auto;
-            border: 1px solid #262626;
-            background: #111111;
+            border-radius: 50%;
+            border: 3px solid #475569;
+            background: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
-        .avatar-img {
+        .node-avatar-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .avatar-fallback {
-            font-size: 0.9em;
-            color: #555555;
+        .node-avatar-fallback {
+            font-size: 20px;
+            color: #64748b;
         }
-        .card-count {
-            font-size: 0.75em;
-            color: #666666;
-            display: block;
-        }
-        .table-center {
-            background: #050505;
-            border: 1px solid #161616;
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-        .discard-card {
+        .node-count {
+            font-size: 12px;
+            color: #94a3b8;
+            background: rgba(0,0,0,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
             display: inline-block;
-            width: 70px;
-            height: 105px;
-            border: 1px solid #333333;
-            background: #000000;
-            line-height: 105px;
-            font-size: 1.1em;
+        }
+        .arena-table {
+            background: rgba(0,0,0,0.2);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .arena-discard {
+            width: 80px;
+            height: 120px;
+            border-radius: 14px;
+            border: 5px solid #ffffff;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 28px;
             font-weight: bold;
+            line-height: 110px;
             text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
         }
-        .hand-container {
-            text-align: center;
+        .arena-hand-container {
+            background: rgba(0,0,0,0.4);
+            border-radius: 24px;
             padding: 15px;
-            background: #0a0a0a;
-            border: 1px solid #1c1c1c;
-            min-height: 140px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            min-height: 150px;
         }
-        .hand-cards {
+        .arena-hand-title {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        .arena-hand-cards {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
-        .game-card {
-            width: 65px;
-            height: 95px;
-            background: #000000;
-            border: 1px solid #333333;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+        .arena-card {
+            width: 70px;
+            height: 105px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 4px solid #ffffff;
+            color: #0f172a;
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
-            padding: 2px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .game-card:hover {
-            border-color: #ffffff !important;
-            transform: translateY(-4px);
+        .arena-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 0px rgba(0,0,0,0.3);
         }
-        .action-bar {
-            margin-top: 15px;
+        .arena-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
+        }
+
+        @keyframes cardFlipIn {
+            0% { opacity: 0; transform: rotateX(-90deg) translateY(80px); }
+            100% { opacity: 1; transform: rotateX(0deg) translateY(0); }
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div id="lobby-screen" class="container">
-        <h1>uno lobby</h1>
-        <p>enter configurations to join the arena match:</p>
-        
-        <div class="form-group" style="margin-top: 25px;">
-            <label for="usernameInput">display name</label>
-            <input type="text" id="usernameInput" placeholder="guest username" autocomplete="off">
-        </div>
-        
-        <div class="form-group">
-            <label for="emailInput">email configuration (optional)</label>
-            <input type="email" id="emailInput" placeholder="owner or player verification" autocomplete="off">
-        </div>
-        
-        <div class="form-group">
-            <label>custom profile avatar image</label>
-            <div class="file-upload-wrapper">
-                <span class="file-label-text" id="file-status-text">drag profile here or browse file</span>
-                <input type="file" id="avatarUpload" accept="image/*" onchange="updateFileLabel()">
-            </div>
-        </div>
-        
-        <div style="margin-top: 30px;">
-            <button onclick="joinGame()">join game</button>
+    <div id="flashOverlay"></div>
+
+    <div id="clickZone" onclick="startCinematicIntro()">
+        <div class="click-card-frame">
+            <i class="fas fa-gamepad"></i>
+            <h2>CLICK ANYWHERE TO ENTER</h2>
         </div>
     </div>
 
-    <div id="game-screen" class="container hidden">
-        <div class="status-box" id="status-message">
-            awaiting match matrix generation...
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+    <div class="bg-shape shape-4"></div>
+
+    <div class="container">
+        <h1 id="titleHeader">
+            <span id="letter-E">E</span>
+            <span id="letter-L">L</span>
+            <span id="letter-I">I</span>
+            <span id="letter-A">A</span>
+            <span id="letter-S">S'S</span>
+            <span style="width: 25px;"></span>
+            <span id="word-UNO">
+                <span class="u-blue">U</span><span class="n-green">N</span><span class="o-red">O</span>
+            </span>
+        </h1>
+
+        <div id="mainMenu" class="view-panel">
+            <div class="game-card card-blue" onclick="switchView('botsMenu')">
+                <i class="fas fa-robot"></i>
+                <span>Play With Bots</span>
+            </div>
+            <div class="game-card card-green" onclick="switchView('onlineMenu')">
+                <i class="fas fa-globe"></i>
+                <span>Play Online</span>
+            </div>
         </div>
-        
-        <div class="players-grid" id="players-list"></div>
-        
-        <div class="table-center">
-            <p style="margin-top: 0; font-size: 0.75em; color: #555555; text-transform: lowercase;">active discard stack</p>
-            <div class="discard-card" id="top-discard">-</div>
+
+        <div id="botsMenu" class="view-panel">
+            <div class="game-card card-blue" onclick="initializeBotMatch(1)">
+                <span class="numeric">1</span>
+                <span>1 Bot</span>
+            </div>
+            <div class="game-card card-green" onclick="initializeBotMatch(2)">
+                <span class="numeric">2</span>
+                <span>2 Bots</span>
+            </div>
+            <div class="game-card card-yellow" onclick="initializeBotMatch(3)">
+                <span class="numeric">3</span>
+                <span>3 Bots</span>
+            </div>
+            <div class="back-container">
+                <button class="btn-back" onclick="switchView('mainMenu')">
+                    <i class="fas fa-arrow-left"></i>Go Back
+                </button>
+            </div>
         </div>
-        
-        <div class="hand-container">
-            <p style="margin-top: 0; font-size: 0.75em; color: #555555; text-transform: lowercase;">your card deck matrix</p>
-            <div class="hand-cards" id="your-hand"></div>
+
+        <div id="onlineMenu" class="view-panel centered-layout">
+            <div class="form-panel" style="border-color: var(--u-blue);">
+                <h3>PLAYER ARCHITECTURE</h3>
+                
+                <div class="input-group">
+                    <label for="usernameInput">Display Name</label>
+                    <input type="text" id="usernameInput" class="room-input" placeholder="ENTER USERNAME" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label for="emailInput">Email Configuration (Optional)</label>
+                    <input type="text" id="emailInput" class="room-input" style="font-size:15px;" placeholder="verification@domain.com" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label>Custom Profile Avatar Image</label>
+                    <div class="file-upload-container">
+                        <span class="file-upload-text" id="fileStatusText">Drop image file here or browse</span>
+                        <input type="file" id="avatarUpload" accept="image/*" onchange="updateFileLabelText()">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
+                    <button class="btn-action" style="background:var(--u-blue); box-shadow:0 6px 0 #0093b8;" onclick="processLobbyAction('create')">MAKE ROOM</button>
+                    <button class="btn-action" style="background:var(--o-red); box-shadow:0 6px 0 #c0392b;" onclick="processLobbyAction('join_view')">JOIN ROOM</button>
+                </div>
+            </div>
+            <div class="back-container">
+                <button class="btn-back" onclick="switchView('mainMenu')">
+                    <i class="fas fa-arrow-left"></i>Go Back
+                </button>
+            </div>
         </div>
-        
-        <div class="action-bar">
-            <button onclick="drawCard()">draw card matrix</button>
+
+        <div id="makeRoomPanel" class="view-panel centered-layout">
+            <div class="form-panel" style="border-color: var(--u-blue);">
+                <h3>ROOM CREATOR</h3>
+                <p style="color: #64748b; font-size:14px;">Share this code with your friends:</p>
+                <div class="code-display" id="generatedRoomCode">--------</div>
+                
+                <h4 style="text-align:left; margin-bottom:10px; font-size:15px; color:#475569;">LOBBY ROSTER:</h4>
+                <div class="session-roster" id="makeRoomRoster"></div>
+
+                <button class="btn-action" id="btnStartGame" onclick="launchMatchEngine()">START GAME</button>
+            </div>
+            <div class="back-container">
+                <button class="btn-back" onclick="terminateSession('onlineMenu')">
+                    <i class="fas fa-arrow-left"></i>Cancel Room
+                </button>
+            </div>
         </div>
+
+        <div id="joinRoomPanel" class="view-panel centered-layout">
+            <div class="form-panel" style="border-color: var(--o-red);">
+                <h3>JOIN PRIVATE LOBBY</h3>
+                <div class="input-group">
+                    <input type="text" id="inputRoomCode" class="room-input" maxlength="8" placeholder="ENTER 8-DIGIT CODE" oninput="validateInputCode()">
+                </div>
+
+                <div id="joinRosterContainer" style="display: none; transform-origin: top center;">
+                    <h4 style="text-align:left; margin-bottom:10px; font-size:15px; color:#475569;">ROOM MEMBERS:</h4>
+                    <div class="session-roster" id="joinRoomRoster"></div>
+                </div>
+
+                <button class="btn-action btn-disabled" id="btnJoinLobby" onclick="executeLobbyJoin()">JOIN LOBBY</button>
+            </div>
+            <div class="back-container">
+                <button class="btn-back" onclick="terminateSession('onlineMenu')">
+                    <i class="fas fa-arrow-left"></i>Cancel Entry
+                </button>
+            </div>
+        </div>
+
+        <div id="gameScreenPanel" class="view-panel centered-layout">
+            <div class="arena-panel">
+                <div class="arena-status" id="arenaStatusMsg">Awaiting execution matrix sync...</div>
+                
+                <div class="arena-grid" id="arenaPlayersGrid"></div>
+                
+                <div class="arena-table">
+                    <p style="font-size:12px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Discard Stack</p>
+                    <div class="arena-discard" id="arenaTopDiscard">-</div>
+                </div>
+                
+                <div class="arena-hand-container">
+                    <div class="arena-hand-title">Your Playable Card Deck Matrix:</div>
+                    <div class="arena-hand-cards" id="arenaYourHand"></div>
+                </div>
+                
+                <div style="margin-top:15px;">
+                    <button class="btn-action" style="background:var(--u-blue); box-shadow:0 6px 0 #0093b8;" onclick="drawCardFromStack()">DRAW CARD MATRIX</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        let gameState = null;
+        const audioUrls = {
+            E: "https://mp3tourl.com/audio/1780086146620-4115871c-60f6-4c11-b084-f646a3a0cc5c.mp3",
+            L: "https://mp3tourl.com/audio/1780086347871-2d76deca-014a-4edf-b3f1-815fcf69c756.ogg",
+            I: "https://mp3tourl.com/audio/1780086363537-1d4cba28-0b0a-4951-a813-f6431d54f195.ogg",
+            A: "https://mp3tourl.com/audio/1780086515711-75a55ab2-de94-4951-86bc-d935bc50cee3.ogg",
+            S: "https://mp3tourl.com/audio/1780086397663-7c030948-3568-4f01-a87d-b3cd69a4546c.ogg",
+            UNO: "https://mp3tourl.com/audio/1780086634138-3c098ea5-eb0d-4c89-a7c1-d67a2bce18cd.ogg"
+        };
 
-        // Visual update for file upload prompt field
-        function updateFileLabel() {
+        const botFirstNames = ["Slayer", "Shadow", "Glitch", "Alpha", "Hyper", "Blaze", "Retro", "Pixel", "Nova", "Cyber"];
+        const botLastNames = ["Bot", "AI", "Mech", "X", "Droid", "Runner", "Core", "Vortex", "Matrix", "Zero"];
+        
+        let activeSession = { roomCode: null, players: [], isHost: false };
+        let gameState = null;
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playLocalSfx(type) {
+            initAudioContext();
+            if (!audioCtx) return;
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            osc.type = type === 'hover' ? 'triangle' : 'sine';
+            let startFreq = type === 'hover' ? 340 : 200;
+            let endFreq = type === 'hover' ? 90 : 50;
+            let duration = type === 'hover' ? 0.09 : 0.16;
+            let vol = type === 'hover' ? 0.12 : 0.35;
+
+            osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function startCinematicIntro() {
+            document.getElementById('clickZone').style.display = 'none';
+            initAudioContext();
+
+            const sequence = [
+                { id: 'letter-E', key: 'E', delay: 100 },
+                { id: 'letter-L', key: 'L', delay: 600 },
+                { id: 'letter-I', key: 'I', delay: 1100 },
+                { id: 'letter-A', key: 'A', delay: 1600 },
+                { id: 'letter-S', key: 'S', delay: 2100 },
+                { id: 'word-UNO', key: 'UNO', delay: 2800 }
+            ];
+
+            sequence.forEach(item => {
+                setTimeout(() => {
+                    let sound = new Audio(audioUrls[item.key]);
+                    sound.play().catch(e => console.log("Blocked:", e));
+                    document.getElementById(item.id).classList.add('pop-in');
+                    if (item.key === 'UNO') { triggerScreenFlash(); }
+                }, item.delay);
+            });
+        }
+
+        function triggerScreenFlash() {
+            setTimeout(() => {
+                const flash = document.getElementById('flashOverlay');
+                flash.classList.add('flash-active');
+                const mainMenu = document.getElementById('mainMenu');
+                mainMenu.classList.add('active-view');
+                setTimeout(() => { mainMenu.classList.add('reveal-cards'); }, 50);
+            }, 100); 
+        }
+
+        function switchView(targetId) {
+            playLocalSfx('click');
+            const activePanel = document.querySelector('.view-panel.active-view');
+            if (activePanel) {
+                activePanel.classList.remove('active-view', 'reveal-cards');
+            }
+            setTimeout(() => {
+                const targetPanel = document.getElementById(targetId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active-view');
+                    setTimeout(() => { targetPanel.classList.add('reveal-cards'); }, 50);
+                }
+            }, 50);
+        }
+
+        function updateFileLabelText() {
             const fileInput = document.getElementById('avatarUpload');
-            const label = document.getElementById('file-status-text');
+            const statusLabel = document.getElementById('fileStatusText');
             if (fileInput.files.length > 0) {
-                label.innerText = fileInput.files[0].name.toLowerCase();
-                label.style.color = '#ffffff';
+                statusLabel.innerText = fileInput.files[0].name;
+                statusLabel.style.color = 'var(--u-blue)';
             } else {
-                label.innerText = 'drag profile here or browse file';
-                label.style.color = '#666666';
+                statusLabel.innerText = "Drop image file here or browse";
+                statusLabel.style.color = '#64748b';
             }
         }
 
-        async function joinGame() {
-            const username = document.getElementById('usernameInput').value;
-            const email = document.getElementById('emailInput').value;
-            const fileInput = document.getElementById('avatarUpload');
-            
-            let avatarSource = null;
+        function terminateSession(targetPanelId) {
+            activeSession = { roomCode: null, players: [], isHost: false };
+            document.getElementById('inputRoomCode').value = "";
+            document.getElementById('joinRosterContainer').style.display = "none";
+            switchView(targetPanelId);
+        }
 
-            // Handle asset uploading conversion logic cleanly to string format
+        function makeRandomCode(length) {
+            let result = '';
+            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        function makeRandomBotName() {
+            let fn = botFirstNames[Math.floor(Math.random() * botFirstNames.length)];
+            let ln = botLastNames[Math.floor(Math.random() * botLastNames.length)];
+            return `${fn} ${ln}`;
+        }
+
+        function renderRoster(domElementId) {
+            const container = document.getElementById(domElementId);
+            container.innerHTML = "";
+            activeSession.players.forEach(p => {
+                const item = document.createElement('div');
+                item.className = `roster-item active-connected ${p.isBot ? 'bot-player' : 'user-player'}`;
+                
+                const leftDiv = document.createElement('div');
+                leftDiv.innerHTML = `${p.isBot ? '<i class="fas fa-robot" style="margin-right:8px;"></i>' : '<i class="fas fa-user" style="margin-right:8px;"></i>'} <span>${p.name}</span>`;
+                
+                const rightSpan = document.createElement('span');
+                rightSpan.className = "status-badge";
+                rightSpan.innerText = p.isHost ? "HOST" : "READY";
+                
+                item.appendChild(leftDiv);
+                item.appendChild(rightSpan);
+                container.appendChild(item);
+            });
+        }
+
+        function initializeBotMatch(count) {
+            activeSession.roomCode = makeRandomCode(8);
+            activeSession.isHost = true;
+            activeSession.players = [{ name: "You (Player)", isBot: false, isHost: true }];
+            for(let i=0; i<count; i++) {
+                activeSession.players.push({ name: makeRandomBotName(), isBot: true, isHost: false });
+            }
+            switchView('makeRoomPanel');
+            document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
+            renderRoster('makeRoomRoster');
+            document.getElementById('btnStartGame').innerText = "START BOT MATCH";
+        }
+
+        async function processLobbyAction(actionType) {
+            const username = document.getElementById('usernameInput').value.trim() || "Guest Player";
+            const email = document.getElementById('emailInput').value.trim();
+            const fileInput = document.getElementById('avatarUpload');
+            let avatarData = null;
+
             if (fileInput.files.length > 0) {
-                avatarSource = await new Promise((resolve) => {
+                avatarData = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
                     reader.readAsDataURL(fileInput.files[0]);
                 });
             }
 
+            if (actionType === 'create') {
+                activeSession.roomCode = makeRandomCode(8);
+                activeSession.isHost = true;
+                activeSession.players = [{ name: username, isBot: false, isHost: true, avatar: avatarData }];
+                
+                try {
+                    const response = await fetch('/api/start_game', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username, email: email, avatar_source: avatarData })
+                    });
+                    if (response.ok) {
+                        gameState = await response.json();
+                        switchView('makeRoomPanel');
+                        document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
+                        renderRoster('makeRoomRoster');
+                        document.getElementById('btnStartGame').innerText = "START GAME";
+                    }
+                } catch (e) {
+                    switchView('makeRoomPanel');
+                    document.getElementById('generatedRoomCode').innerText = activeSession.roomCode;
+                    renderRoster('makeRoomRoster');
+                }
+            } else if (actionType === 'join_view') {
+                switchView('joinRoomPanel');
+            }
+        }
+
+        function validateInputCode() {
+            const inputField = document.getElementById('inputRoomCode');
+            const joinBtn = document.getElementById('btnJoinLobby');
+            let code = inputField.value.trim().toUpperCase();
+            inputField.value = code;
+
+            if (code.length === 8) {
+                playLocalSfx('hover');
+                joinBtn.classList.remove('btn-disabled');
+                activeSession.roomCode = code;
+                activeSession.isHost = false;
+                activeSession.players = [
+                    { name: makeRandomBotName() + " (Host)", isBot: true, isHost: true },
+                    { name: makeRandomBotName(), isBot: true, isHost: false }
+                ];
+                renderRoster('joinRoomRoster');
+                document.getElementById('joinRosterContainer').style.display = "block";
+            } else {
+                joinBtn.classList.add('btn-disabled');
+                document.getElementById('joinRosterContainer').style.display = "none";
+            }
+        }
+
+        async function executeLobbyJoin() {
+            const joinBtn = document.getElementById('btnJoinLobby');
+            if (joinBtn.classList.contains('btn-disabled')) return;
+            playLocalSfx('click');
+
+            const username = document.getElementById('usernameInput').value.trim() || "Guest Player";
+            const email = document.getElementById('emailInput').value.trim();
+            activeSession.players.push({ name: username, isBot: false, isHost: false });
+            
             try {
                 const response = await fetch('/api/start_game', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        email: email,
-                        avatar_source: avatarSource
-                    })
+                    body: JSON.stringify({ username: username, email: email })
                 });
-
                 if (response.ok) {
                     gameState = await response.json();
-                    document.getElementById('lobby-screen').classList.add('hidden');
-                    document.getElementById('game-screen').classList.remove('hidden');
-                    renderGame();
-                } else {
-                    alert('Lobby entry request rejected by service pipeline.');
+                    enterMatchScreen();
                 }
-            } catch (err) {
-                console.error("Connection matrix error:", err);
-                alert('Failed to contact backend server routing.');
+            } catch(e) {
+                enterMatchScreen();
             }
         }
 
-        // Color mapper utility to translate token strings to theme colors
+        function launchMatchEngine() {
+            playLocalSfx('click');
+            enterMatchScreen();
+        }
+
+        function enterMatchScreen() {
+            if (!gameState) {
+                // Local fallback dataset matrix mapping architecture
+                gameState = {
+                    status_message: "match pipeline started locally.",
+                    top_discard: { value: "7", color: "blue" },
+                    current_turn: 0,
+                    game_over: false,
+                    players: activeSession.players.map((p, i) => ({
+                        name: p.name,
+                        is_owner: p.isHost,
+                        avatar: p.avatar || "",
+                        card_count: 7,
+                        hand: i === 0 ? [
+                            { value: "3", color: "blue" },
+                            { value: "7", color: "red" },
+                            { value: "Skip", color: "green" },
+                            { value: "5", color: "yellow" },
+                            { value: "Draw 2", color: "blue" }
+                        ] : []
+                    }))
+                };
+            }
+            switchView('gameScreenPanel');
+            renderArenaLayout();
+        }
+
         function getColorHex(colorName) {
             switch(colorName.toLowerCase()) {
-                case 'red': return '#e51c23';
-                case 'blue': return '#1e88e5';
-                case 'green': return '#43a047';
-                case 'yellow': return '#fdd835';
-                default: return '#7b1fa2'; // Wild color theme mapping
+                case 'red': return 'var(--o-red)';
+                case 'blue': return 'var(--u-blue)';
+                case 'green': return 'var(--n-green)';
+                case 'yellow': return 'var(--y-yellow)';
+                default: return '#7b1fa2';
             }
         }
 
-        function renderGame() {
+        function renderArenaLayout() {
             if (!gameState) return;
 
-            // Handle terminal log/status box processing string references
-            document.getElementById('status-message').innerText = gameState.status_message.toLowerCase();
+            document.getElementById('arenaStatusMsg').innerText = gameState.status_message;
             
-            // Render Central Discard Target Card Stack
             const topCard = gameState.top_discard;
-            const discardDiv = document.getElementById('top-discard');
+            const discardDiv = document.getElementById('arenaTopDiscard');
             if (topCard) {
                 discardDiv.innerText = topCard.value;
                 discardDiv.style.borderColor = getColorHex(topCard.color);
                 discardDiv.style.color = getColorHex(topCard.color);
             }
 
-            // Render Active Registered Profiles / Bot Entities Matrix
-            const playersGrid = document.getElementById('players-list');
+            const playersGrid = document.getElementById('arenaPlayersGrid');
             playersGrid.innerHTML = '';
             
             gameState.players.forEach((p, idx) => {
-                const pNode = document.createElement('div');
-                pNode.className = 'player-node';
-                
-                // Track turn state indicators dynamically
+                const node = document.createElement('div');
+                node.className = 'arena-node';
                 if (gameState.current_turn === idx && !gameState.game_over) {
-                    pNode.classList.add('active-turn');
+                    node.classList.add('active-turn');
                 }
                 
-                // Process image asset structure mapping logic based on source depth
                 let avatarLayout = '';
                 if (p.avatar && p.avatar.length > 5) {
-                    avatarLayout = `<img class="avatar-img" src="${p.avatar}" alt="pfp">`;
+                    avatarLayout = `<img class="node-avatar-img" src="${p.avatar}" alt="pfp">`;
                 } else {
-                    avatarLayout = `<span class="avatar-fallback">${p.avatar || idx}</span>`;
+                    avatarLayout = `<i class="fas ${p.is_owner ? 'fa-user-crown' : 'fa-user'} node-avatar-fallback"></i>`;
                 }
                 
-                pNode.innerHTML = `
-                    <span class="player-name">${p.name.toLowerCase()}</span>
-                    ${p.is_owner ? '<span class="owner-tag">[owner]</span>' : ''}
-                    <div class="avatar-frame">
-                        ${avatarLayout}
-                    </div>
-                    <span class="card-count">cards: ${p.card_count}</span>
+                node.innerHTML = `
+                    <span class="node-name">${p.name}</span>
+                    ${p.is_owner ? '<span class="node-tag">HOST</span>' : ''}
+                    <div class="node-avatar-frame">${avatarLayout}</div>
+                    <span class="node-count">Cards: ${p.card_count}</span>
                 `;
-                playersGrid.appendChild(pNode);
+                playersGrid.appendChild(node);
             });
 
-            // Render Player Execution Hand Matrix Layout
-            const handDiv = document.getElementById('your-hand');
+            const handDiv = document.getElementById('arenaYourHand');
             handDiv.innerHTML = '';
             
             const humanPlayer = gameState.players[0];
             if (humanPlayer && humanPlayer.hand) {
                 humanPlayer.hand.forEach((card, idx) => {
-                    const cardBtn = document.createElement('button');
-                    cardBtn.className = 'game-card';
-                    cardBtn.innerText = card.value;
-                    cardBtn.style.borderColor = getColorHex(card.color);
-                    cardBtn.style.color = getColorHex(card.color);
-                    
-                    // Route index parameters to play validation stack on request click
-                    cardBtn.onclick = () => playCard(idx);
-                    handDiv.appendChild(cardBtn);
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'arena-card';
+                    cardElement.innerText = card.value;
+                    cardElement.style.color = getColorHex(card.color);
+                    cardElement.style.borderColor = getColorHex(card.color);
+                    cardElement.onclick = () => playCardFromHand(idx);
+                    handDiv.appendChild(cardElement);
                 });
             }
 
-            // If a bot turn state remains active, automatically route loop trigger after short fallback delay
             if (gameState.current_turn !== 0 && !gameState.game_over) {
-                setTimeout(triggerAiTurn, 1400);
+                setTimeout(triggerAiTurnRoutine, 1500);
             }
         }
 
-        async function playCard(cardIdx) {
-            // Check turn priority locally before hitting connection streams
-            if (gameState.current_turn !== 0) {
-                alert("Wait for processing priority cycle to complete.");
-                return;
-            }
+        async function playCardFromHand(cardIdx) {
+            if (gameState.current_turn !== 0) { return; }
+            playLocalSfx('click');
 
             try {
                 const response = await fetch('/api/play_card', {
@@ -428,21 +1129,27 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ player_idx: 0, card_idx: cardIdx })
                 });
-                
                 if (response.ok) {
                     gameState = await response.json();
-                    renderGame();
-                } else {
-                    const err = await response.json();
-                    alert(err.error || "Card processing assertion failure.");
+                    renderArenaLayout();
+                    return;
                 }
-            } catch (err) {
-                console.error("Card pipeline execution error:", err);
-            }
+            } catch (e) {}
+
+            // Local simulation fallback handling logic
+            let myHand = gameState.players[0].hand;
+            let playedCard = myHand[cardIdx];
+            gameState.top_discard = playedCard;
+            myHand.splice(cardIdx, 1);
+            gameState.players[0].card_count = myHand.length;
+            gameState.current_turn = 1;
+            gameState.status_message = "You played a card. Bot turn processing...";
+            renderArenaLayout();
         }
 
-        async function drawCard() {
+        async function drawCardFromStack() {
             if (gameState.current_turn !== 0) return;
+            playLocalSfx('hover');
 
             try {
                 const response = await fetch('/api/draw_card', {
@@ -452,25 +1159,40 @@
                 });
                 if (response.ok) {
                     gameState = await response.json();
-                    renderGame();
+                    renderArenaLayout();
+                    return;
                 }
-            } catch (err) {
-                console.error("Stack pulling failure:", err);
-            }
+            } catch (e) {}
+
+            // Local fallback pulling simulation logic
+            gameState.players[0].hand.push({ value: Math.floor(Math.random()*10).toString(), color: "red" });
+            gameState.players[0].card_count = gameState.players[0].hand.length;
+            gameState.current_turn = 1;
+            gameState.status_message = "You drew a card from stack matrix.";
+            renderArenaLayout();
         }
 
-        async function triggerAiTurn() {
+        async function triggerAiTurnRoutine() {
             if (gameState.game_over) return;
-            
+
             try {
                 const response = await fetch('/api/ai_turn', { method: 'POST' });
                 if (response.ok) {
                     gameState = await response.json();
-                    renderGame();
+                    renderArenaLayout();
+                    return;
                 }
-            } catch (err) {
-                console.error("Bot thread automation skip:", err);
-            }
+            } catch (e) {}
+
+            // Local simulation routine logic
+            let botIdx = gameState.current_turn;
+            gameState.players[botIdx].card_count -= 1;
+            gameState.status_message = `${gameState.players[botIdx].name} completed pipeline execution.`;
+            
+            let nextTurn = botIdx + 1;
+            if (nextTurn >= gameState.players.length) { nextTurn = 0; }
+            gameState.current_turn = nextTurn;
+            renderArenaLayout();
         }
     </script>
 </body>
