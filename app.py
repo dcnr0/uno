@@ -1,14 +1,11 @@
 import os
 import random
 import string
-import smtplib
-from email.mime.text import MIMEText
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
 
-# 1. Initialize Flask with explicit folder path definitions for Render
+# Initialize Flask with explicit folder path definitions for Render
 app = Flask(__name__, 
             template_folder='templates', 
             static_folder='sfx', 
@@ -22,23 +19,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f"sqlite:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Email SMTP Settings - Configure these environment variables on Render
-SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-SMTP_USER = os.environ.get('SMTP_USER', 'your_email@gmail.com')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'your_app_password')
-
 # --- DATABASE MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    pfp_index = db.Column(db.Integer, default=1) # 1-4 for avatar choices
-    is_verified = db.Column(db.Boolean, default=False)
-    verification_code = db.Column(db.String(6), nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    is_owner = db.Column(db.Boolean, default=False)
+    avatar_source = db.Column(db.Text, default="1")
 
-# Master Memory In-Memory State for active tables
+# Master In-Memory State for active tables
 game_state = {
     "deck": [],
     "discard_pile": [],
@@ -69,89 +58,29 @@ def generate_deck():
     random.shuffle(deck)
     return deck
 
-def send_verification_email(target_email, code):
-    msg = MIMEText(f"Your UNO Game verification security authorization code is: {code}")
-    msg['Subject'] = 'Verify your UNO Account'
-    msg['From'] = SMTP_USER
-    msg['To'] = target_email
-
-    try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_USER, [target_email], msg.as_string())
-        server.quit()
-        return True
-    except Exception as e:
-        print(f"Email error: {e}", flush=True)
-        return False
-
 # --- FRONTEND ROUTE ---
 @app.route('/')
 def serve_index():
     return render_template('index.html')
 
-# --- AUTHENTICATION ENDPOINTS ---
-@app.route('/api/auth/signup', methods=['POST'])
-def signup():
-    data = request.json or {}
-    if not data.get('username') or not data.get('email') or not data.get('password'):
-        return jsonify({"error": "Missing registration details!"}), 400
-
-    if User.query.filter_by(username=data['username']).first() or User.query.filter_by(email=data['email']).first():
-        return jsonify({"error": "Username or Email already registered!"}), 400
-    
-    code = ''.join(random.choices(string.digits, k=6))
-    hashed_pw = generate_password_hash(data['password'])
-    
-    new_user = User(
-        username=data['username'],
-        email=data['email'],
-        password_hash=hashed_pw,
-        pfp_index=data.get('pfp_index', 1),
-        verification_code=code,
-        is_verified=False
-    )
-    db.session.add(new_user)
-    db.session.commit()
-    
-    # Try sending email
-    send_verification_email(data['email'], code)
-    
-    # Always print code to Render logs so you can copy/paste it without email config working yet
-    print(f"\n[DEV DEBUG] Verification code for {data['email']} is: {code}\n", flush=True)
-    
-    return jsonify({"message": "Registration complete! Code issued to email.", "email": data['email']})
-
-@app.route('/api/auth/verify', methods=['POST'])
-def verify():
-    data = request.json or {}
-    user = User.query.filter_by(email=data.get('email'), verification_code=data.get('code')).first()
-    if not user:
-        return jsonify({"error": "Invalid verification code!"}), 400
-    
-    user.is_verified = True
-    user.verification_code = None
-    db.session.commit()
-    return jsonify({"success": True, "username": user.username, "pfp_index": user.pfp_index})
-
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    data = request.json or {}
-    user = User.query.filter_by(username=data.get('username')).first()
-    if not user or not check_password_hash(user.password_hash, data.get('password', '')):
-        return jsonify({"error": "Invalid username or password credentials."}), 400
-    if not user.is_verified:
-        return jsonify({"error": "Account not verified! Check email for your code.", "unverified": True, "email": user.email}), 400
-    
-    return jsonify({"success": True, "username": user.username, "pfp_index": user.pfp_index})
-
-# --- GAME MECHANICS ENDPOINTS ---
+# --- GAME JOIN / SETUP ENDPOINT ---
 @app.route('/api/start_game', methods=['POST'])
 def start_game():
     data = request.json or {}
-    username = data.get("username", "You")
-    pfp_index = data.get("pfp_index", 1)
+    
+    username = data.get("username", "").strip()
+    if not username:
+        username = f"Guest_{''.join(random.choices(string.ascii_uppercase + string.digits, k=4))}"
+        
+    # Check if this player is the hardcoded owner
+    player_email = data.get("email", "").strip().lower()
+    is_owner_profile = (player_email == "whyiseliashere@gmail.com")
+
+    # If avatar_source is provided (uploaded custom image), use it.
+    # Otherwise, assign a completely random sample index from 1 to 4.
+    avatar_source = data.get("avatar_source")
+    if not avatar_source:
+        avatar_source = str(random.randint(1, 4))
     
     game_state["deck"] = generate_deck()
     game_state["discard_pile"] = []
@@ -160,11 +89,12 @@ def start_game():
     game_state["game_over"] = False
     game_state["winner"] = None
     
+    # Configure match entities
     game_state["players"] = [
-        {"name": username, "is_bot": False, "pfp": pfp_index, "hand": []},
-        {"name": "Bot Slayer", "is_bot": True, "pfp": 2, "hand": []},
-        {"name": "Bot Retro", "is_bot": True, "pfp": 3, "hand": []},
-        {"name": "Bot Glitch", "is_bot": True, "pfp": 4, "hand": []}
+        {"name": username, "is_bot": False, "avatar": avatar_source, "is_owner": is_owner_profile, "hand": []},
+        {"name": "Bot Slayer", "is_bot": True, "avatar": "2", "is_owner": False, "hand": []},
+        {"name": "Bot Retro", "is_bot": True, "avatar": "3", "is_owner": False, "hand": []},
+        {"name": "Bot Glitch", "is_bot": True, "avatar": "4", "is_owner": False, "hand": []}
     ]
     
     for _ in range(7):
@@ -180,7 +110,7 @@ def start_game():
     game_state["discard_pile"].append(starter)
     game_state["current_color"] = starter["color"]
     game_state["current_value"] = starter["value"]
-    game_state["status_message"] = f"Deck shuffled and dealt! Top discard is {starter['color']} {starter['value']}."
+    game_state["status_message"] = f"Match initialized! Top discard is {starter['color']} {starter['value']}."
     
     return jsonify(get_clean_state())
 
@@ -191,7 +121,8 @@ def get_clean_state():
         visible_players.append({
             "name": p["name"],
             "is_bot": p["is_bot"],
-            "pfp": p["pfp"],
+            "avatar": p["avatar"],
+            "is_owner": p.get("is_owner", False),
             "card_count": len(p["hand"]),
             "hand": p["hand"] if idx == 0 else []
         })
@@ -323,7 +254,6 @@ def ai_turn():
         request.json = {"player_idx": current_idx}
         return draw_card()
 
-# 3. Dynamic setup block for Gunicorn / Render execution vs Local run
 with app.app_context():
     db.create_all()
 
