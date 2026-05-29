@@ -3,17 +3,22 @@ import random
 import string
 import smtplib
 from email.mime.text import MIMEText
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
-app = Flask(__name__)
+# 1. Initialize Flask with explicit folder path definitions for Render
+app = Flask(__name__, 
+            template_folder='templates', 
+            static_folder='sfx', 
+            static_url_path='/sfx')
+
 CORS(app)
 
 # Database Configuration (SQLite for local testing, ready for Render PostgreSQL)
-# For Render PostgreSQL, set the DATABASE_URL environment variable on your Render dashboard
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///uno_game.db')
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f"sqlite:///{os.path.join(BASE_DIR, 'uno_game.db')}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -78,13 +83,21 @@ def send_verification_email(target_email, code):
         server.quit()
         return True
     except Exception as e:
-        print(f"Email error: {e}")
+        print(f"Email error: {e}", flush=True)
         return False
+
+# --- FRONTEND ROUTE ---
+@app.route('/')
+def serve_index():
+    return render_template('index.html')
 
 # --- AUTHENTICATION ENDPOINTS ---
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
-    data = request.json
+    data = request.json or {}
+    if not data.get('username') or not data.get('email') or not data.get('password'):
+        return jsonify({"error": "Missing registration details!"}), 400
+
     if User.query.filter_by(username=data['username']).first() or User.query.filter_by(email=data['email']).first():
         return jsonify({"error": "Username or Email already registered!"}), 400
     
@@ -102,16 +115,18 @@ def signup():
     db.session.add(new_user)
     db.session.commit()
     
-    # Try sending email. If SMTP variables aren't configured yet, log code to console for easy developer access
+    # Try sending email
     send_verification_email(data['email'], code)
-    print(f"DEVELOPER NOTICE: Verification code for {data['email']} is {code}")
+    
+    # Always print code to Render logs so you can copy/paste it without email config working yet
+    print(f"\n[DEV DEBUG] Verification code for {data['email']} is: {code}\n", flush=True)
     
     return jsonify({"message": "Registration complete! Code issued to email.", "email": data['email']})
 
 @app.route('/api/auth/verify', methods=['POST'])
 def verify():
-    data = request.json
-    user = User.query.filter_by(email=data['email'], verification_code=data['code']).first()
+    data = request.json or {}
+    user = User.query.filter_by(email=data.get('email'), verification_code=data.get('code')).first()
     if not user:
         return jsonify({"error": "Invalid verification code!"}), 400
     
@@ -122,9 +137,9 @@ def verify():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    data = request.json
-    user = User.query.filter_by(username=data['username']).first()
-    if not user or not check_password_hash(user.password_hash, data['password']):
+    data = request.json or {}
+    user = User.query.filter_by(username=data.get('username')).first()
+    if not user or not check_password_hash(user.password_hash, data.get('password', '')):
         return jsonify({"error": "Invalid username or password credentials."}), 400
     if not user.is_verified:
         return jsonify({"error": "Account not verified! Check email for your code.", "unverified": True, "email": user.email}), 400
@@ -145,7 +160,6 @@ def start_game():
     game_state["game_over"] = False
     game_state["winner"] = None
     
-    # Add human with profile specs + 3 automated bots with varied pfps
     game_state["players"] = [
         {"name": username, "is_bot": False, "pfp": pfp_index, "hand": []},
         {"name": "Bot Slayer", "is_bot": True, "pfp": 2, "hand": []},
@@ -153,7 +167,6 @@ def start_game():
         {"name": "Bot Glitch", "is_bot": True, "pfp": 4, "hand": []}
     ]
     
-    # Deal out initial 7-card distributions
     for _ in range(7):
         for p in game_state["players"]:
             p["hand"].append(game_state["deck"].pop())
@@ -188,7 +201,7 @@ def get_clean_state():
         "direction": state["direction"],
         "current_color": state["current_color"],
         "current_value": state["current_value"],
-        "top_discard": state["discard_pile"][-1],
+        "top_discard": state["discard_pile"][-1] if state["discard_pile"] else None,
         "game_over": state["game_over"],
         "winner": state["winner"],
         "status_message": state["status_message"]
@@ -205,7 +218,7 @@ def is_playable(card):
 
 @app.route('/api/play_card', methods=['POST'])
 def play_card():
-    data = request.json
+    data = request.json or {}
     player_idx = data.get("player_idx", 0)
     card_idx = data.get("card_idx")
     chosen_color = data.get("chosen_color")
@@ -267,7 +280,8 @@ def play_card():
 
 @app.route('/api/draw_card', methods=['POST'])
 def draw_card():
-    player_idx = request.json.get("player_idx", 0)
+    data = request.json or {}
+    player_idx = data.get("player_idx", 0)
     if player_idx != game_state["current_turn"] or game_state["game_over"]:
         return jsonify({"error": "Not your turn!"}), 400
         
@@ -309,7 +323,9 @@ def ai_turn():
         request.json = {"player_idx": current_idx}
         return draw_card()
 
+# 3. Dynamic setup block for Gunicorn / Render execution vs Local run
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all() # Generates local database file automatically if it doesn't exist
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
